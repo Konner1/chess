@@ -17,10 +17,15 @@ public class PieceMovesCalc {
 
     private static Collection<ChessMove> getBishopMoves(ChessBoard board, ChessPosition position) {
         HashSet<ChessMove> moves = new HashSet<>();
-        int[][] directions = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+        ChessPiece myPiece = board.getPiece(position);
+        if (myPiece == null) {
+            return moves;
+        }
+        int[][] directions = {{1, 1}, {-1, 1}, {1, -1}, {-1, -1}};
         for (int[] direction : directions) {
             int row = position.getRow();
             int column = position.getColumn();
+
             while (true) {
                 row += direction[0];
                 column += direction[1];
@@ -28,11 +33,64 @@ public class PieceMovesCalc {
                     break;
                 }
                 ChessPosition endPosition = new ChessPosition(row,column);
-                moves.add(new ChessMove(position, endPosition, null));
-            }
+                ChessPiece occupyingPiece = null;
 
+                try {
+                    occupyingPiece = board.getPiece(endPosition);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    break; // Defensive: shouldn't happen, but just in case
+                }
+
+                if (occupyingPiece == null) {
+                    moves.add(new ChessMove(position, endPosition, null));
+                }
+                else {
+                    if (occupyingPiece.getTeamColor() != myPiece.getTeamColor()) {
+                        moves.add(new ChessMove(position, endPosition, null)); // Capture
+                    }
+                    break;
+                }
+            }
         }
         return moves;
+    }
+
+    private static Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition position) {
+        HashSet<ChessMove> rMoves = new HashSet<>();
+        ChessPiece myPiece = board.getPiece(position);
+        if (myPiece == null) {
+            return rMoves;
+        }
+        int[][] directions = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}};
+        for (int[] rDirection : directions) {
+            int row = position.getRow();
+            int column = position.getColumn();
+
+            while (true) {
+                row += rDirection[0];
+                column += rDirection[1];
+                if (row < 1 || row > 8 || column < 1 || column > 8) {
+                    break;
+                }
+                ChessPosition endPosition = new ChessPosition(row,column);
+                ChessPiece occupyingPiece = null;
+                try {
+                    occupyingPiece = board.getPiece(endPosition);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    break; // Defensive: shouldn't happen, but just in case
+                }
+                if (occupyingPiece == null) {
+                    rMoves.add(new ChessMove(position, endPosition, null));
+                }
+                else {
+                    if (occupyingPiece.getTeamColor() != myPiece.getTeamColor()) {
+                        rMoves.add(new ChessMove(position, endPosition, null)); // Capture
+                    }
+                    break;
+                }
+            }
+        }
+        return rMoves;
     }
 
 }
