@@ -7,7 +7,7 @@ public class PieceMovesCalc {
     public static Collection<ChessMove> calcMoves(ChessPiece piece, ChessBoard board, ChessPosition position) {
         return switch (piece.getPieceType()) {
             case KING -> null;//KingMoveCalculator.getMoves(board, position);
-            case QUEEN -> null;//QueenMoveCalculator.getMoves(board, position);
+            case QUEEN -> getQueenMoves(board,position);
             case BISHOP -> getBishopMoves(board, position);
             case KNIGHT -> null;//KnightMoveCalculator.getMoves(board, position);
             case ROOK -> getRookMoves(board,position);
@@ -81,6 +81,40 @@ public class PieceMovesCalc {
             }
         }
         return rMoves;
+    }
+
+    private static Collection<ChessMove> getQueenMoves(ChessBoard board, ChessPosition position) {
+        HashSet<ChessMove> qMoves = new HashSet<>();
+        ChessPiece myPiece = board.getPiece(position);
+        if (myPiece == null) {
+            return qMoves;
+        }
+        int[][] directions = {{1, 0}, {-1, 0}, {0, -1}, {0, 1}, {1,-1}, {-1,-1}, {1,1}, {-1,1}};
+        for (int[] qDirection : directions) {
+            int row = position.getRow();
+            int column = position.getColumn();
+
+            while (true) {
+                row += qDirection[0];
+                column += qDirection[1];
+                if (row < 1 || row > 8 || column < 1 || column > 8) {
+                    break;
+                }
+                ChessPosition endPosition = new ChessPosition(row,column);
+                ChessPiece occupyingPiece = board.getPiece(endPosition);
+
+                if (occupyingPiece == null) {
+                    qMoves.add(new ChessMove(position, endPosition, null));
+                }
+                else {
+                    if (occupyingPiece.getTeamColor() != myPiece.getTeamColor()) {
+                        qMoves.add(new ChessMove(position, endPosition, null)); // Capture
+                    }
+                    break;
+                }
+            }
+        }
+        return qMoves;
     }
 
 }
