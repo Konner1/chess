@@ -10,7 +10,7 @@ public class PieceMovesCalc {
             case QUEEN -> null;//QueenMoveCalculator.getMoves(board, position);
             case BISHOP -> getBishopMoves(board, position);
             case KNIGHT -> null;//KnightMoveCalculator.getMoves(board, position);
-            case ROOK -> null;//RookMoveCalculator.getMoves(board, position);
+            case ROOK -> getRookMoves(board,position);
             case PAWN -> null;//PawnMoveCalculator.getMoves(board, position);
         };
     }
@@ -33,13 +33,7 @@ public class PieceMovesCalc {
                     break;
                 }
                 ChessPosition endPosition = new ChessPosition(row,column);
-                ChessPiece occupyingPiece = null;
-
-                try {
-                    occupyingPiece = board.getPiece(endPosition);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    break; // Defensive: shouldn't happen, but just in case
-                }
+                ChessPiece occupyingPiece = board.getPiece(endPosition);
 
                 if (occupyingPiece == null) {
                     moves.add(new ChessMove(position, endPosition, null));
@@ -73,12 +67,8 @@ public class PieceMovesCalc {
                     break;
                 }
                 ChessPosition endPosition = new ChessPosition(row,column);
-                ChessPiece occupyingPiece = null;
-                try {
-                    occupyingPiece = board.getPiece(endPosition);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    break; // Defensive: shouldn't happen, but just in case
-                }
+                ChessPiece occupyingPiece = board.getPiece(endPosition);
+
                 if (occupyingPiece == null) {
                     rMoves.add(new ChessMove(position, endPosition, null));
                 }
