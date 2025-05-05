@@ -9,7 +9,7 @@ public class PieceMovesCalc {
             case KING -> null;//KingMoveCalculator.getMoves(board, position);
             case QUEEN -> getQueenMoves(board,position);
             case BISHOP -> getBishopMoves(board, position);
-            case KNIGHT -> null;//KnightMoveCalculator.getMoves(board, position);
+            case KNIGHT -> getKnightMoves(board,position);
             case ROOK -> getRookMoves(board,position);
             case PAWN -> null;//PawnMoveCalculator.getMoves(board, position);
         };
@@ -46,7 +46,7 @@ public class PieceMovesCalc {
                 }
             }
         }
-        return moves;
+            return moves;
     }
 
     private static Collection<ChessMove> getRookMoves(ChessBoard board, ChessPosition position) {
@@ -80,7 +80,7 @@ public class PieceMovesCalc {
                 }
             }
         }
-        return rMoves;
+            return rMoves;
     }
 
     private static Collection<ChessMove> getQueenMoves(ChessBoard board, ChessPosition position) {
@@ -114,7 +114,31 @@ public class PieceMovesCalc {
                 }
             }
         }
-        return qMoves;
+            return qMoves;
+    }
+
+    private static Collection<ChessMove> getKnightMoves(ChessBoard board, ChessPosition position) {
+        HashSet<ChessMove> nMoves = new HashSet<>();
+        ChessPiece myPiece = board.getPiece(position);
+        if (myPiece == null) {
+            return nMoves;
+        }
+        int[][] directions = {{2,1},{2,-1},{-2,1},{-2,-1},{1,2},{1,-2},{-1,2},{-1,-2}};
+        for (int[] nDirection : directions) {
+            int row = position.getRow();
+            int column = position.getColumn();
+            row += nDirection[0];
+            column += nDirection[1];
+            if (row < 1 || row > 8 || column < 1 || column > 8) {
+                continue;
+            }
+            ChessPosition endPosition = new ChessPosition(row, column);
+            ChessPiece occupyingPiece = board.getPiece(endPosition);
+            if (occupyingPiece == null || occupyingPiece.getTeamColor() != myPiece.getTeamColor()) {
+                nMoves.add(new ChessMove(position, endPosition, null));
+            }
+        }
+            return nMoves;
     }
 
 }
