@@ -6,7 +6,7 @@ import java.util.HashSet;
 public class PieceMovesCalc {
     public static Collection<ChessMove> calcMoves(ChessPiece piece, ChessBoard board, ChessPosition position) {
         return switch (piece.getPieceType()) {
-            case KING -> null;//KingMoveCalculator.getMoves(board, position);
+            case KING -> getKingMoves(board,position);
             case QUEEN -> getQueenMoves(board,position);
             case BISHOP -> getBishopMoves(board, position);
             case KNIGHT -> getKnightMoves(board,position);
@@ -139,6 +139,55 @@ public class PieceMovesCalc {
             }
         }
             return nMoves;
+    }
+
+    private static Collection<ChessMove> getKingMoves(ChessBoard board, ChessPosition position) {
+        HashSet<ChessMove> kMoves = new HashSet<>();
+        ChessPiece myPiece = board.getPiece(position);
+        if (myPiece == null) {
+            return kMoves;
+        }
+        int[][] directions = {{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1},{-1,0}};
+        for (int[] kDirection : directions) {
+            int row = position.getRow();
+            int column = position.getColumn();
+            row += kDirection[0];
+            column += kDirection[1];
+            if (row < 1 || row > 8 || column < 1 || column > 8) {
+                continue;
+            }
+            ChessPosition endPosition = new ChessPosition(row, column);
+            ChessPiece occupyingPiece = board.getPiece(endPosition);
+            if (occupyingPiece == null || occupyingPiece.getTeamColor() != myPiece.getTeamColor()) {
+                kMoves.add(new ChessMove(position, endPosition, null));
+            }
+        }
+        return kMoves;
+    }
+
+    private static Collection<ChessMove> getPawnMoves(ChessBoard board, ChessPosition position) {
+        HashSet<ChessMove> pMoves = new HashSet<>();
+        ChessPiece myPiece = board.getPiece(position);
+        if (myPiece == null) {
+            return pMoves;
+        }
+        int[][] directions = {{0,1}};
+        for (int[] pDirection : directions) {
+            int row = position.getRow();
+            int column = position.getColumn();
+            row += pDirection[0];
+            column += pDirection[1];
+            if (row < 1 || row > 8 || column < 1 || column > 8) {
+                column += pDirection[1];
+                continue;
+            }
+            ChessPosition endPosition = new ChessPosition(row, column);
+            ChessPiece occupyingPiece = board.getPiece(endPosition);
+            if (occupyingPiece == null) {
+                pMoves.add(new ChessMove(position, endPosition, null));
+            }
+        }
+        return pMoves;
     }
 
 }
