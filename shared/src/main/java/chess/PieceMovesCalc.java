@@ -202,14 +202,26 @@ public class PieceMovesCalc {
         if (row == startRow){
             ChessPosition endPosition = new ChessPosition(row + direction, column);
             ChessPosition endPosition2 = new ChessPosition(row + (direction *2), column);
-            pMoves.add(new ChessMove(position, endPosition, null));
-            pMoves.add(new ChessMove(position, endPosition2,null));
+            ChessPiece occupyingPiece = board.getPiece(endPosition);
+            ChessPiece occupyingPiece2 = board.getPiece(endPosition2);
+            if (occupyingPiece == null){
+                pMoves.add(new ChessMove(position, endPosition, null));
+            }
+            if (occupyingPiece2 == null) {
+                pMoves.add(new ChessMove(position, endPosition2, null));
+            }
         } else{
             ChessPosition endPosition = new ChessPosition(row + direction, column);
-            if (endPosition.getRow() == endRow){
-                pMoves.add(new ChessMove(position, endPosition,null ));
+            ChessPiece occupyingPiece = board.getPiece(endPosition);
+            if (occupyingPiece == null) {
+                if (endPosition.getRow() == endRow) {
+                    for (ChessPiece.PieceType promo : promotionOptions) {
+                        pMoves.add(new ChessMove(position, endPosition, promo));
+                    }
+                } else {
+                    pMoves.add(new ChessMove(position, endPosition, null));
+                }
             }
-            pMoves.add(new ChessMove(position, endPosition, null));
         }
 
 
