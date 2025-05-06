@@ -171,22 +171,31 @@ public class PieceMovesCalc {
         if (myPiece == null) {
             return pMoves;
         }
-        int[][] directions = {{0,1}};
-        for (int[] pDirection : directions) {
-            int row = position.getRow();
-            int column = position.getColumn();
-            row += pDirection[0];
-            column += pDirection[1];
-            if (row < 1 || row > 8 || column < 1 || column > 8) {
-                column += pDirection[1];
-                continue;
-            }
-            ChessPosition endPosition = new ChessPosition(row, column);
-            ChessPiece occupyingPiece = board.getPiece(endPosition);
-            if (occupyingPiece == null) {
-                pMoves.add(new ChessMove(position, endPosition, null));
-            }
+        int row = position.getRow();
+        int column = position.getColumn();
+        int direction;
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            direction = 1;
+        } else {
+            direction = -1;
         }
+        int startRow;
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            startRow = 2;
+        } else {
+            startRow = 7;
+        }
+        int endRow;
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            endRow = 8;
+        } else {
+            endRow = 1;
+        }
+
+
+
+
+
         return pMoves;
     }
 
