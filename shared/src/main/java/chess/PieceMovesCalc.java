@@ -206,9 +206,9 @@ public class PieceMovesCalc {
             ChessPiece occupyingPiece2 = board.getPiece(endPosition2);
             if (occupyingPiece == null){
                 pMoves.add(new ChessMove(position, endPosition, null));
-            }
-            if (occupyingPiece2 == null) {
-                pMoves.add(new ChessMove(position, endPosition2, null));
+                if (occupyingPiece2 == null) {
+                    pMoves.add(new ChessMove(position, endPosition2, null));
+                }
             }
         } else{
             ChessPosition endPosition = new ChessPosition(row + direction, column);
@@ -223,6 +223,26 @@ public class PieceMovesCalc {
                 }
             }
         }
+        int[][] attackOffsets = {{direction, -1}, {direction, 1}};
+        for (int[] offset : attackOffsets) {
+            int newRow = row + offset[0];
+            int newCol = column + offset[1];
+            if (newRow >= 1 && newRow <= 8 && newCol >= 1 && newCol <= 8) {
+                ChessPosition attackPos = new ChessPosition(newRow, newCol);
+                ChessPiece targetPiece = board.getPiece(attackPos);
+                if (targetPiece != null && targetPiece.getTeamColor() != myPiece.getTeamColor()) {
+                    if (newRow == endRow) {
+                        for (ChessPiece.PieceType promo : promotionOptions) {
+                            pMoves.add(new ChessMove(position, attackPos, promo));
+                        }
+                    } else {
+
+                        pMoves.add(new ChessMove(position, attackPos, null));
+                    }
+                }
+            }
+        }
+
 
 
 
