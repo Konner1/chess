@@ -191,6 +191,17 @@ public class PieceMovesCalc {
         } else {
             endRow = 1;
         }
+        if (row == startRow){
+            ChessPosition endPosition = new ChessPosition(row + 1, column);
+            ChessPosition endPosition2 = new ChessPosition(row + 2, column);
+            pMoves.add(new ChessMove(position, endPosition, null));
+            pMoves.add(new ChessMove(position, endPosition2,null));
+        } else if (row == endRow){
+            ChessPosition endPosition = new ChessPosition(row + 1, column);
+        } else{
+            ChessPosition endPosition = new ChessPosition(row + 1, column);
+        }
+
 
 
 
