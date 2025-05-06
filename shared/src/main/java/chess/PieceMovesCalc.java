@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 public class PieceMovesCalc {
     public static Collection<ChessMove> calcMoves(ChessPiece piece, ChessBoard board, ChessPosition position) {
@@ -11,7 +12,7 @@ public class PieceMovesCalc {
             case BISHOP -> getBishopMoves(board, position);
             case KNIGHT -> getKnightMoves(board,position);
             case ROOK -> getRookMoves(board,position);
-            case PAWN -> null;//PawnMoveCalculator.getMoves(board, position);
+            case PAWN -> getPawnMoves(board, position);
         };
     }
 
@@ -191,15 +192,24 @@ public class PieceMovesCalc {
         } else {
             endRow = 1;
         }
+
+        List<ChessPiece.PieceType> promotionOptions = List.of(
+                ChessPiece.PieceType.QUEEN,
+                ChessPiece.PieceType.ROOK,
+                ChessPiece.PieceType.BISHOP,
+                ChessPiece.PieceType.KNIGHT
+        );
         if (row == startRow){
-            ChessPosition endPosition = new ChessPosition(row + 1, column);
-            ChessPosition endPosition2 = new ChessPosition(row + 2, column);
+            ChessPosition endPosition = new ChessPosition(row + direction, column);
+            ChessPosition endPosition2 = new ChessPosition(row + (direction *2), column);
             pMoves.add(new ChessMove(position, endPosition, null));
             pMoves.add(new ChessMove(position, endPosition2,null));
-        } else if (row == endRow){
-            ChessPosition endPosition = new ChessPosition(row + 1, column);
         } else{
-            ChessPosition endPosition = new ChessPosition(row + 1, column);
+            ChessPosition endPosition = new ChessPosition(row + direction, column);
+            if (endPosition.getRow() == endRow){
+                pMoves.add(new ChessMove(position, endPosition,null ));
+            }
+            pMoves.add(new ChessMove(position, endPosition, null));
         }
 
 
