@@ -236,7 +236,6 @@ public class PieceMovesCalc {
                             pMoves.add(new ChessMove(position, attackPos, promo));
                         }
                     } else {
-
                         pMoves.add(new ChessMove(position, attackPos, null));
                     }
                 }
