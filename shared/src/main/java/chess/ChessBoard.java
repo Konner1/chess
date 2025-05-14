@@ -41,6 +41,24 @@ public class ChessBoard {
         return squares[row][column];
     }
 
+    public ChessBoard copy() {
+        ChessBoard copy = new ChessBoard();
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                ChessPiece originalPiece = squares[row][col];
+                if (originalPiece != null) {
+                    // Create a new instance of the same piece
+                    ChessPiece copiedPiece = new ChessPiece(
+                            originalPiece.getTeamColor(),
+                            originalPiece.getPieceType()
+                    );
+                    copy.squares[row][col] = copiedPiece;
+                }
+            }
+        }
+        return copy;
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
