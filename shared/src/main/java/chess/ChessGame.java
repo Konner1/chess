@@ -21,14 +21,6 @@ public class ChessGame {
         board.resetBoard();
         setTeamTurn(TeamColor.WHITE);
     }
-
-    public ChessGame deepCopy() {
-        ChessGame copy = new ChessGame();
-        copy.setBoard(this.board.copy()); // use your working ChessBoard.copy()
-        copy.setTeamTurn(this.teamTurn);  // preserve whose turn it is
-        return copy;
-    }
-
     /**
      * @return Which team's turn it is
      */
@@ -82,12 +74,9 @@ public class ChessGame {
         HashSet<ChessMove> possibleMoves = (HashSet<ChessMove>) board.getPiece(startPosition).pieceMoves(board, startPosition);
         HashSet<ChessMove> validMoves = HashSet.newHashSet(possibleMoves.size());
         for (ChessMove move : possibleMoves) {
-
             ChessBoard copiedBoard = board.copy();
-
             copiedBoard.addPiece(move.getEndPosition(), currPiece);
             copiedBoard.addPiece(startPosition, null);
-
             ChessGame simulatedGame = new ChessGame();
             simulatedGame.setBoard(copiedBoard);
             simulatedGame.setTeamTurn(teamTurn);
@@ -114,10 +103,8 @@ public class ChessGame {
         if (move.getPromotionPiece() != null) {
             piece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
         }
-
         board.addPiece(move.getEndPosition(), piece);
         board.addPiece(move.getStartPosition(), null);
-
         teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
@@ -143,13 +130,13 @@ public class ChessGame {
             }
         }
 
-        for (int y = 1; y <= 8; y++) {
-            for (int x = 1; x <= 8; x++) {
-                ChessPiece currPiece = board.getPiece(new ChessPosition(y, x));
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece currPiece = board.getPiece(new ChessPosition(row, col));
                 if (currPiece == null || currPiece.getTeamColor() == teamColor) {
                     continue;
                 }
-                for (ChessMove enemyMove : currPiece.pieceMoves(board, new ChessPosition(y, x))) {
+                for (ChessMove enemyMove : currPiece.pieceMoves(board, new ChessPosition(row, col))) {
                     if (enemyMove.getEndPosition().equals(kingP)) {
                         return true;
                     }
