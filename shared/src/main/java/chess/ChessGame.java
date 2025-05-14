@@ -82,16 +82,19 @@ public class ChessGame {
         HashSet<ChessMove> possibleMoves = (HashSet<ChessMove>) board.getPiece(startPosition).pieceMoves(board, startPosition);
         HashSet<ChessMove> validMoves = HashSet.newHashSet(possibleMoves.size());
         for (ChessMove move : possibleMoves) {
-            ChessPiece tempPiece = board.getPiece(move.getEndPosition());
-            board.addPiece(startPosition, null); //Remove the piece so that it can be moved to a new spot temporarily
-            board.addPiece(move.getEndPosition(), currPiece);
-            if (!isInCheck(currPiece.getTeamColor())) {
+
+            ChessBoard copiedBoard = board.copy();
+
+            copiedBoard.addPiece(move.getEndPosition(), currPiece);
+            copiedBoard.addPiece(startPosition, null);
+
+            ChessGame simulatedGame = new ChessGame();
+            simulatedGame.setBoard(copiedBoard);
+            simulatedGame.setTeamTurn(teamTurn);
+
+            if (!simulatedGame.isInCheck(currPiece.getTeamColor())) {
                 validMoves.add(move);
             }
-            //Reset the board to its original layout
-            board.addPiece(move.getEndPosition(), tempPiece);
-            board.addPiece(startPosition, currPiece);
-
         }
         return validMoves;
     }
