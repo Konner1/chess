@@ -22,6 +22,13 @@ public class ChessGame {
         setTeamTurn(TeamColor.WHITE);
     }
 
+    public ChessGame deepCopy() {
+        ChessGame copy = new ChessGame();
+        copy.setBoard(this.board.copy()); // use your working ChessBoard.copy()
+        copy.setTeamTurn(this.teamTurn);  // preserve whose turn it is
+        return copy;
+    }
+
     /**
      * @return Which team's turn it is
      */
@@ -68,25 +75,25 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null || piece.getTeamColor() != teamTurn) {
+        ChessPiece currPiece = board.getPiece(startPosition);
+        if (currPiece == null) {
             return null;
         }
-
-        HashSet<ChessMove> moves = new HashSet<>(PieceMovesCalc.calcMoves(piece, board, startPosition));
-        for (ChessMove move : allMoves) {
-            ChessGame copy = this.deepCopy();
-            try {
-                copy.makeMove(move);
-                if (!copy.isInCheck(piece.getTeamColor())) {
-                    legalMoves.add(move);
-                }
-            } catch (InvalidMoveException ignored) {
-                // move is invalid, skip
+        HashSet<ChessMove> possibleMoves = (HashSet<ChessMove>) board.getPiece(startPosition).pieceMoves(board, startPosition);
+        HashSet<ChessMove> validMoves = HashSet.newHashSet(possibleMoves.size());
+        for (ChessMove move : possibleMoves) {
+            ChessPiece tempPiece = board.getPiece(move.getEndPosition());
+            board.addPiece(startPosition, null); //Remove the piece so that it can be moved to a new spot temporarily
+            board.addPiece(move.getEndPosition(), currPiece);
+            if (!isInCheck(currPiece.getTeamColor())) {
+                validMoves.add(move);
             }
-        }
+            //Reset the board to its original layout
+            board.addPiece(move.getEndPosition(), tempPiece);
+            board.addPiece(startPosition, currPiece);
 
-        return legalMoves;
+        }
+        return validMoves;
     }
 
     /**
