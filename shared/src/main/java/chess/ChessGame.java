@@ -104,12 +104,8 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> valid = validMoves(move.getStartPosition());
-        if (valid == null || !valid.contains(move)) {
-            throw new InvalidMoveException("Invalid move");
-        }
         ChessPiece piece = board.getPiece(move.getStartPosition());
-
-        if (piece.getTeamColor() != teamTurn) {
+        if (valid == null || !valid.contains(move) || piece.getTeamColor() != teamTurn) {
             throw new InvalidMoveException("Invalid move");
         }
 
