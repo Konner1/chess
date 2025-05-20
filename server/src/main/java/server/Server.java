@@ -1,27 +1,19 @@
 package server;
 
-import com.google.gson.Gson;
-import model.ErrorResponse;
-import service.ClearService;
-import spark.Spark;
+import spark.*;
 
 public class Server {
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
+
         Spark.staticFiles.location("web");
 
-        Spark.delete("/db", (req, res) -> {
-            try {
-                new ClearService().clearApplication();
-                res.status(200);
-                return "{}";
-            } catch (Exception e) {
-                res.status(500);
-                return new Gson().toJson(new ErrorResponse("Error: " + e.getMessage()));
-            }
-        });
+        // Register your endpoints and handle exceptions here.
 
+        //This line initializes the server and can be removed once you have a functioning endpoint
         Spark.init();
+
         Spark.awaitInitialization();
         return Spark.port();
     }
