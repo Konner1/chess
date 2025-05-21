@@ -43,8 +43,16 @@ public class UserService {
         }
 
         String token = UUID.randomUUID().toString();
-        authDAO.insertAuth(new AuthData(token, user.username()));
+        authDAO.insertAuth(new AuthData(user.username(),token));
 
         return new AuthData(user.username(), token);
+    }
+
+    public void logout(String authToken) throws Exception {
+        if (authToken == null || authDAO.getAuth(authToken) == null) {
+            throw new Exception("unauthorized");
+        }
+
+        authDAO.deleteAuth(authToken);
     }
 }

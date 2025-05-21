@@ -35,16 +35,16 @@ public class UserHandler extends BaseHandler {
         }
     };
 
-//    public Route logout = (Request req, Response res) -> {
-//        try {
-//            String authToken = req.headers("Authorization");
-//            new UserService().logout(authToken);
-//            res.status(200);
-//            return "{}";
-//        } catch (Exception e) {
-//            String msg = e.getMessage();
-//            if (msg.contains("unauthorized")) return error(res, 401, msg);
-//            return error(res, 500, msg);
-//        }
-//    };
+    public Route logout = (Request req, Response res) -> {
+        try {
+            String authToken = req.headers("Authorization");
+            new UserService().logout(authToken);
+            res.status(200);
+            return "{}";
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            if (msg.contains("unauthorized")) return error(res, 401, msg);
+            return error(res, 500, msg);
+        }
+    };
 }
