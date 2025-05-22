@@ -43,9 +43,8 @@ public class GameHandler extends BaseHandler {
     public Route joinGame = (Request req, Response res) -> {
         try {
             String authToken = req.headers("Authorization");
-
-            // Use Map for flexible field access
             Map<String, Object> body = gson.fromJson(req.body(), Map.class);
+
             if (body == null || !body.containsKey("playerColor") || !body.containsKey("gameID")) {
                 throw new Exception("bad request");
             }

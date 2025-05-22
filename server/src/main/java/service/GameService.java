@@ -39,7 +39,6 @@ public class GameService {
 
         var allGames = gameDAO.listGames();
 
-        // Map each GameData to a trimmed version
         List<Map<String, Object>> result = new ArrayList<>();
         for (var game : allGames) {
             Map<String, Object> map = new HashMap<>();
@@ -74,7 +73,7 @@ public class GameService {
                 throw new Exception("already taken");
             }
             game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName());
-        } else { // BLACK
+        } else {
             if (game.blackUsername() != null) {
                 throw new Exception("already taken");
             }
