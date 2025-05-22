@@ -42,7 +42,6 @@ public class UserHandler extends BaseHandler {
             return error(res, 500, msg);
         }
     };
-
     public Route logout = (Request req, Response res) -> {
         try {
             String authToken = req.headers("Authorization");
