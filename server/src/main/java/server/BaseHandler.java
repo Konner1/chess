@@ -3,9 +3,12 @@ package server;
 import com.google.gson.Gson;
 import model.ErrorResponse;
 import spark.Response;
+import com.google.gson.GsonBuilder;
 
 public abstract class BaseHandler {
-    protected final Gson gson = new Gson();
+    protected final Gson gson = new GsonBuilder()
+            .serializeNulls()
+            .create();
 
     protected String error(Response res, int statusCode, String message) {
         res.status(statusCode);
