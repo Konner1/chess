@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryAuthDAO implements AuthDAO {
-    private static MemoryAuthDAO instance = new MemoryAuthDAO();
-    public static MemoryAuthDAO getInstance() { return instance; }
+    private static MemoryAuthDAO INSTANCE = new MemoryAuthDAO();
+    public static MemoryAuthDAO getINSTANCE() { return INSTANCE; }
 
     private final Map<String, AuthData> tokens = new HashMap<>();
 

@@ -9,6 +9,6 @@ public class ClearService {
     public void clearApplication() throws DataAccessException {
         MemoryUserDAO.getInstance().clear();
         MemoryGameDAO.getInstance().clear();
-        MemoryAuthDAO.getInstance().clear();
+        MemoryAuthDAO.getINSTANCE().clear();
     }
 }

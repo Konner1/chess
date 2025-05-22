@@ -20,8 +20,12 @@ public class GameHandler extends BaseHandler {
             return success(res, Map.of("gameID", result.gameID()));
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (msg.contains("unauthorized")) return error(res, 401, msg);
-            if (msg.contains("bad request")) return error(res, 400, msg);
+            if (msg.contains("unauthorized")){
+                return error(res, 401, msg);
+            }
+            if (msg.contains("bad request")){
+                return error(res, 400, msg);
+            }
             return error(res, 500, msg);
         }
     };
@@ -35,7 +39,9 @@ public class GameHandler extends BaseHandler {
             return success(res, Map.of("games", games));
         } catch (Exception e) {
             String msg = e.getMessage(); // <-- this could be null
-            if (msg != null && msg.contains("unauthorized")) return error(res, 401, msg);
+            if (msg != null && msg.contains("unauthorized")){
+                return error(res, 401, msg);
+            }
             return error(res, 500, msg != null ? msg : "internal server error");
         }
     };
@@ -63,9 +69,15 @@ public class GameHandler extends BaseHandler {
             return "{}";
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (msg != null && msg.contains("unauthorized")) return error(res, 401, msg);
-            if (msg != null && msg.contains("already taken")) return error(res, 403, msg);
-            if (msg != null && msg.contains("bad request")) return error(res, 400, msg);
+            if (msg != null && msg.contains("unauthorized")){
+                return error(res, 401, msg);
+            }
+            if (msg != null && msg.contains("already taken")){
+                return error(res, 403, msg);
+            }
+            if (msg != null && msg.contains("bad request")){
+                return error(res, 400, msg);
+            }
             return error(res, 500, msg != null ? msg : "internal server error");
         }
     };

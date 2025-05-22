@@ -16,8 +16,12 @@ public class UserHandler extends BaseHandler {
             return success(res, result);
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (msg.contains("already taken")) return error(res, 403, msg);
-            if (msg.contains("bad request")) return error(res, 400, msg);
+            if (msg.contains("already taken")){
+                return error(res, 403, msg);
+            }
+            if (msg.contains("bad request")){
+                return error(res, 400, msg);
+            }
             return error(res, 500, msg);
         }
     };
@@ -29,8 +33,12 @@ public class UserHandler extends BaseHandler {
             return success(res, result);
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (msg.contains("unauthorized")) return error(res, 401, msg);
-            if (msg.contains("bad request")) return error(res, 400, msg);
+            if (msg.contains("unauthorized")){
+                return error(res, 401, msg);
+            }
+            if (msg.contains("bad request")){
+                return error(res, 400, msg);
+            }
             return error(res, 500, msg);
         }
     };
@@ -43,7 +51,9 @@ public class UserHandler extends BaseHandler {
             return "{}";
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (msg.contains("unauthorized")) return error(res, 401, msg);
+            if (msg.contains("unauthorized")){
+                return error(res, 401, msg);
+            }
             return error(res, 500, msg);
         }
     };

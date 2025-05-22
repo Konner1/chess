@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class UserService {
     private final UserDAO userDAO = MemoryUserDAO.getInstance();
-    private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
+    private final AuthDAO authDAO = MemoryAuthDAO.getINSTANCE();
 
     public AuthData register(UserData user) throws Exception {
         if (user.username() == null || user.password() == null || user.email() == null) {

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class MemoryGameDAO implements GameDAO {
-    private static final MemoryGameDAO instance = new MemoryGameDAO();
-    public static MemoryGameDAO getInstance() { return instance; }
+    private static final MemoryGameDAO INSTANCE = new MemoryGameDAO();
+    public static MemoryGameDAO getInstance() { return INSTANCE; }
 
     private final Map<Integer, GameData> games = new HashMap<>();
     private int nextGame = 1;

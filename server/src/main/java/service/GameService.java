@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public class GameService {
     private final GameDAO gameDAO = MemoryGameDAO.getInstance();
-    private final AuthDAO authDAO = MemoryAuthDAO.getInstance();
+    private final AuthDAO authDAO = MemoryAuthDAO.getINSTANCE();
 
     public GameData createGame(String gameName, String authToken) throws Exception {
         if (authToken == null || authDAO.getAuth(authToken) == null) {
