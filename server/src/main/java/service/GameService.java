@@ -5,7 +5,6 @@ import dataaccess.MemoryGameDAO;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.AuthDAO;
 import model.GameData;
-import chess.ChessGame;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -53,4 +52,36 @@ public class GameService {
 
         return result;
     }
+
+    public void joinGame(String authToken, String color, int gameID) throws Exception {
+        if (authToken == null || authDAO.getAuth(authToken) == null) {
+            throw new Exception("unauthorized");
+        }
+
+        if (color == null || (!color.equals("WHITE") && !color.equals("BLACK"))) {
+            throw new Exception("bad request");
+        }
+
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            throw new Exception("bad request");
+        }
+
+        String username = authDAO.getAuth(authToken).username();
+
+        if (color.equals("WHITE")) {
+            if (game.whiteUsername() != null) {
+                throw new Exception("already taken");
+            }
+            game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName());
+        } else { // BLACK
+            if (game.blackUsername() != null) {
+                throw new Exception("already taken");
+            }
+            game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName());
+        }
+
+        gameDAO.updateGame(game);
+    }
+
 }
