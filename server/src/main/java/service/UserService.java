@@ -1,7 +1,6 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.MemoryGameDAO;
 import model.UserData;
 import model.AuthData;
 import dataaccess.MemoryAuthDAO;
@@ -27,7 +26,7 @@ public class UserService {
         userDAO.insertUser(user);
 
         String token = UUID.randomUUID().toString();
-        authDAO.insertAuth(new AuthData(token, user.username()));
+        authDAO.insertAuth(new AuthData(user.username(),token));
 
         return new AuthData(user.username(), token);
     }

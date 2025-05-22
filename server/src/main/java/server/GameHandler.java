@@ -44,10 +44,19 @@ public class GameHandler extends BaseHandler {
         try {
             String authToken = req.headers("Authorization");
 
+            // Use Map for flexible field access
             Map<String, Object> body = gson.fromJson(req.body(), Map.class);
+            if (body == null || !body.containsKey("playerColor") || !body.containsKey("gameID")) {
+                throw new Exception("bad request");
+            }
+
             String color = (String) body.get("playerColor");
-            Double idDouble = (Double) body.get("gameID"); // Gson uses Double for numbers
-            int gameID = idDouble.intValue();
+
+            Object idObj = body.get("gameID");
+            if (!(idObj instanceof Number)) {
+                throw new Exception("bad request");
+            }
+            int gameID = ((Number) idObj).intValue();
 
             new GameService().joinGame(authToken, color, gameID);
 
