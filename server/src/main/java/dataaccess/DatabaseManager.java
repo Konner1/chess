@@ -35,8 +35,8 @@ public class DatabaseManager {
             stmt.executeUpdate("""
             CREATE TABLE IF NOT EXISTS users (
                 username VARCHAR(50) PRIMARY KEY,
-                password VARCHAR(100) NOT NULL,
-                email VARCHAR(100)
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255)
             )
         """);
             stmt.executeUpdate("""
@@ -49,7 +49,7 @@ public class DatabaseManager {
             stmt.executeUpdate("""
             CREATE TABLE IF NOT EXISTS games (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                name VARCHAR(100),
+                name VARCHAR(255),
                 game_data TEXT,
                 white_username VARCHAR(50),
                 black_username VARCHAR(50),

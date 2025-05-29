@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import chess.ChessGame;
 
 
 public class GameService {
@@ -25,11 +26,12 @@ public class GameService {
         }
 
         int gameID = gameDAO.getNextGameID();
+        ChessGame game = new ChessGame();
 
-        GameData game = new GameData(gameID, null, null, gameName);
-        gameDAO.insertGame(game);
+        GameData gamedata = new GameData(gameID, null, null, gameName, game);
+        gameDAO.insertGame(gamedata);
 
-        return game;
+        return gamedata;
     }
 
     public List<Map<String, Object>> listGames(String authToken) throws Exception {
@@ -72,12 +74,12 @@ public class GameService {
             if (game.whiteUsername() != null) {
                 throw new Exception("already taken");
             }
-            game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName());
+            game = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
         } else {
             if (game.blackUsername() != null) {
                 throw new Exception("already taken");
             }
-            game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName());
+            game = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
         }
 
         gameDAO.updateGame(game);
