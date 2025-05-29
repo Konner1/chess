@@ -7,7 +7,7 @@ public interface GameDAO {
 
     void insertGame(GameData game) throws DataAccessException;
 
-    int getNextGameID();
+    int getNextGameID() throws DataAccessException;
 
     List<GameData> listGames() throws DataAccessException;
 

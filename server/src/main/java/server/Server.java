@@ -1,10 +1,19 @@
 package server;
 
 import spark.*;
+import dataaccess.DatabaseManager;
+import dataaccess.DataAccessException;
 
 public class Server {
 
     public int run(int desiredPort) {
+        try {
+            DatabaseManager.createDatabase();
+            DatabaseManager.createTables();
+        } catch (DataAccessException ex) {
+            throw new RuntimeException("Failed to initialize database", ex);
+        }
+
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
