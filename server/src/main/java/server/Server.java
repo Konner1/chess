@@ -1,8 +1,9 @@
 package server;
 
 import spark.*;
-import dataaccess.DatabaseManager;
-import dataaccess.DataAccessException;
+import dataaccess.*;
+import service.*;
+import server.*;
 
 public class Server {
 
@@ -19,6 +20,7 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // register your endpoints and handle exceptions here.
+
         Spark.delete("/db", new ClearHandler());
 
         UserHandler userHandler = new UserHandler();

@@ -13,8 +13,8 @@ import chess.ChessGame;
 
 
 public class GameService {
-    private final GameDAO gameDAO = MemoryGameDAO.getInstance();
-    private final AuthDAO authDAO = MemoryAuthDAO.getINSTANCE();
+    private final GameDAO gameDAO = new MySQLGameDAO();
+    private final AuthDAO authDAO = new MySQLAuthDAO();
 
     public GameData createGame(String gameName, String authToken) throws Exception {
         if (authToken == null || authDAO.getAuth(authToken) == null) {

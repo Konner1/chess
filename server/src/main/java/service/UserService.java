@@ -1,18 +1,14 @@
 package service;
 
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.UserData;
 import model.AuthData;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.AuthDAO;
-import dataaccess.MemoryUserDAO;
-import dataaccess.UserDAO;
 
 import java.util.UUID;
 
 public class UserService {
-    private final UserDAO userDAO = MemoryUserDAO.getInstance();
-    private final AuthDAO authDAO = MemoryAuthDAO.getINSTANCE();
+    private final UserDAO userDAO = new MySQLUserDAO();
+    private final AuthDAO authDAO = new MySQLAuthDAO();
 
     public AuthData register(UserData user) throws Exception {
         if (user.username() == null || user.password() == null || user.email() == null) {
