@@ -1,112 +1,66 @@
 package dataaccess;
 
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
-import dataaccess.MySQLAuthDAO;
 import model.AuthData;
-import org.junit.jupiter.api.AfterEach;
+import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.sql.SQLException;
+import service.ClearService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MySQLAuthDAOTest {
-    AuthDAO dao;
-    AuthData defaultAuth;
+
+    private final AuthDAO dao = new MySQLAuthDAO();
+    private final UserDAO userDAO = new MySQLUserDAO(); // Needed to satisfy foreign key constraint
+    private final AuthData testAuth = new AuthData("auth-token", "test-user");
 
     @BeforeEach
-    void setUp() throws DataAccessException, SQLException {
-        DatabaseManager.createDatabase();
-        dao = new MySQLAuthDAO();
-
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("DELETE FROM auth")) {
-                statement.executeUpdate();
-            }
-        }
-
-        defaultAuth = new AuthData("test-token", "test-user");
-    }
-
-    @AfterEach
-    void tearDown() throws SQLException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("DELETE FROM auth")) {
-                statement.executeUpdate();
-            }
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
+    public void setup() throws Exception {
+        new ClearService().clearApplication();
+        // Insert corresponding user to satisfy FK constraint
+        userDAO.insertUser(new UserData("test-user", "pw", "email@test.com"));
     }
 
     @Test
-    void insertAuthPositive() throws DataAccessException, SQLException {
-        dao.insertAuth(defaultAuth);
-
-        try (var conn = DatabaseManager.getConnection();
-             var statement = conn.prepareStatement("SELECT token, username FROM auth WHERE token = ?")) {
-            statement.setString(1, defaultAuth.authToken());
-            try (var results = statement.executeQuery()) {
-                assertTrue(results.next());
-                assertEquals(defaultAuth.authToken(), results.getString("token"));
-                assertEquals(defaultAuth.username(), results.getString("username"));
-            }
-        }
+    public void testInsertAuthPass() throws Exception {
+        assertDoesNotThrow(() -> dao.insertAuth(testAuth));
     }
 
     @Test
-    void insertAuthNegative() throws DataAccessException {
-        dao.insertAuth(defaultAuth);
-        assertThrows(DataAccessException.class, () -> dao.insertAuth(defaultAuth));
+    public void testInsertAuthFail() throws Exception {
+        dao.insertAuth(testAuth);
+        assertThrows(DataAccessException.class, () -> dao.insertAuth(testAuth)); // duplicate token
     }
 
     @Test
-    void deleteAuthPositive() throws DataAccessException, SQLException {
-        dao.insertAuth(defaultAuth);
-        dao.deleteAuth(defaultAuth.authToken());
-
-        try (var conn = DatabaseManager.getConnection();
-             var statement = conn.prepareStatement("SELECT token FROM auth WHERE token = ?")) {
-            statement.setString(1, defaultAuth.authToken());
-            try (var results = statement.executeQuery()) {
-                assertFalse(results.next());
-            }
-        }
+    public void testGetAuthPass() throws Exception {
+        dao.insertAuth(testAuth);
+        AuthData result = dao.getAuth("auth-token");
+        assertEquals(testAuth, result);
     }
 
     @Test
-    void deleteAuthNegative() {
-
-        assertDoesNotThrow(() -> dao.deleteAuth("nonexistent-token"));
-    }
-
-    @Test
-    void getAuthPositive() throws DataAccessException {
-        dao.insertAuth(defaultAuth);
-        AuthData result = dao.getAuth(defaultAuth.authToken());
-        assertEquals(defaultAuth, result);
-    }
-
-    @Test
-    void getAuthNegative() throws DataAccessException {
+    public void testGetAuthFail() throws Exception {
         AuthData result = dao.getAuth("nonexistent-token");
         assertNull(result);
     }
 
     @Test
-    void clearPositive() throws DataAccessException, SQLException {
-        dao.insertAuth(defaultAuth);
-        dao.clear();
+    public void testDeleteAuthPass() throws Exception {
+        dao.insertAuth(testAuth);
+        dao.deleteAuth("auth-token");
+        assertNull(dao.getAuth("auth-token"));
+    }
 
-        try (var conn = DatabaseManager.getConnection();
-             var statement = conn.prepareStatement("SELECT token FROM auth WHERE token = ?")) {
-            statement.setString(1, defaultAuth.authToken());
-            try (var results = statement.executeQuery()) {
-                assertFalse(results.next());
-            }
-        }
+    @Test
+    public void testDeleteAuthFail() {
+        assertDoesNotThrow(() -> dao.deleteAuth("nonexistent-token"));
+    }
+
+    @Test
+    public void testClearAuthTable() throws Exception {
+        dao.insertAuth(testAuth);
+        dao.clear();
+        assertNull(dao.getAuth("auth-token"));
     }
 }

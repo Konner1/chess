@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MySQLUserDAOTest {
 
-    private final UserDAO dao = new MySQLUserDAO();
+    private final UserDAO userdao = new MySQLUserDAO();
     private final UserData testUser = new UserData("konner", "password", "k@gmail.com");
 
     @BeforeEach
@@ -19,19 +19,19 @@ public class MySQLUserDAOTest {
 
     @Test
     public void testInsertUserPass() throws Exception {
-        assertDoesNotThrow(() -> dao.insertUser(testUser));
+        assertDoesNotThrow(() -> userdao.insertUser(testUser));
     }
 
     @Test
     public void testInsertUserFail() throws Exception {
-        dao.insertUser(testUser);
-        assertThrows(DataAccessException.class, () -> dao.insertUser(testUser));  // duplicate user
+        userdao.insertUser(testUser);
+        assertThrows(DataAccessException.class, () -> userdao.insertUser(testUser));  // duplicate user
     }
 
     @Test
     public void testGetUserPass() throws Exception {
-        dao.insertUser(testUser);
-        UserData found = dao.getUser("konner");
+        userdao.insertUser(testUser);
+        UserData found = userdao.getUser("konner");
 
         assertEquals(testUser.username(), found.username());
         assertEquals(testUser.email(), found.email());
@@ -41,14 +41,14 @@ public class MySQLUserDAOTest {
 
     @Test
     public void testGetUserFail() throws Exception {
-        UserData found = dao.getUser("ghost");
+        UserData found = userdao.getUser("ghost");
         assertNull(found);
     }
 
     @Test
     public void testClearUserTable() throws Exception {
-        dao.insertUser(testUser);
-        dao.clear();
-        assertNull(dao.getUser("konner"));
+        userdao.insertUser(testUser);
+        userdao.clear();
+        assertNull(userdao.getUser("konner"));
     }
 }
