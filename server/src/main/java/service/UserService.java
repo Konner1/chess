@@ -5,6 +5,7 @@ import model.UserData;
 import model.AuthData;
 
 import java.util.UUID;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
     private final UserDAO userDAO = new MySQLUserDAO();
@@ -33,7 +34,7 @@ public class UserService {
         }
 
         UserData storedUser = userDAO.getUser(user.username());
-        if (storedUser == null || !storedUser.password().equals(user.password())) {
+        if ((storedUser == null) || !BCrypt.checkpw(user.password(), storedUser.password())) {
             throw new Exception("unauthorized");
         }
 

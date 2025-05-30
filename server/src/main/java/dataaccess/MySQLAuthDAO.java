@@ -22,8 +22,8 @@ public class MySQLAuthDAO implements AuthDAO{
     public void insertAuth(AuthData auth) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement("INSERT INTO auth (token, username) VALUES(?, ?)")) { // is it supposed to be username, token?
-                statement.setString(1, auth.username());
-                statement.setString(2, auth.authToken());
+                statement.setString(1, auth.authToken());
+                statement.setString(2, auth.username());
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -35,16 +35,16 @@ public class MySQLAuthDAO implements AuthDAO{
     public AuthData getAuth(String token) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection();
              var statement = conn.prepareStatement(
-                     "SELECT username, password FROM auth WHERE token = ?")) {
+                     "SELECT username, token FROM auth WHERE token = ?")) {
 
             statement.setString(1, token);
             var result = statement.executeQuery();
 
             if (result.next()) {
                 var username = result.getString("username");
-                return new AuthData(token, username);
+                return new AuthData(username, token);
             } else {
-                throw new DataAccessException("Auth not found: " + token);
+                return null;
             }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to retrieve auth: " + token, e);

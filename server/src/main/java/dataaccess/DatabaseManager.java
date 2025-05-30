@@ -51,8 +51,8 @@ public class DatabaseManager {
                 id INT PRIMARY KEY AUTO_INCREMENT,
                 name VARCHAR(255),
                 game_data TEXT,
-                white_username VARCHAR(50),
-                black_username VARCHAR(50),
+                white_username VARCHAR(100),
+                black_username VARCHAR(100),
                 FOREIGN KEY (white_username) REFERENCES users(username),
                 FOREIGN KEY (black_username) REFERENCES users(username)
             )

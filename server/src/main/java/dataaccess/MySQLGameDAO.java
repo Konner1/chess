@@ -16,7 +16,7 @@ public class MySQLGameDAO implements GameDAO{
     public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(
-                    "DELETE FROM game")) {
+                    "DELETE FROM games")) {
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -28,7 +28,7 @@ public class MySQLGameDAO implements GameDAO{
     public void insertGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(
-                    "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, game) VALUES(?, ?, ?, ?, ?)")) {
+                    "INSERT INTO games (id, white_username, black_username, name, game_data) VALUES(?, ?, ?, ?, ?)")) {
                 statement.setInt(1, game.gameID());
                 statement.setString(2, game.whiteUsername());
                 statement.setString(3, game.blackUsername());
@@ -44,7 +44,7 @@ public class MySQLGameDAO implements GameDAO{
     @Override
     public int getNextGameID() throws DataAccessException{
         try (var conn = DatabaseManager.getConnection();
-             var statement = conn.prepareStatement("SELECT MAX(gameID) AS maxID FROM game");
+             var statement = conn.prepareStatement("SELECT MAX(id) AS maxID FROM games");
              var result = statement.executeQuery()) {
             if (result.next()) {
                 return result.getInt("maxID") + 1;
@@ -62,15 +62,15 @@ public class MySQLGameDAO implements GameDAO{
 
         try (var conn = DatabaseManager.getConnection();
              var statement = conn.prepareStatement(
-                     "SELECT gameID, whiteUsername, blackUsername, gameName, chessGame FROM game");
+                     "SELECT id, white_username, black_username, name, game_data FROM games");
              var results = statement.executeQuery()) {
 
             while (results.next()) {
-                int gameID = results.getInt("gameID");
-                String whiteUsername = results.getString("whiteUsername");
-                String blackUsername = results.getString("blackUsername");
-                String gameName = results.getString("gameName");
-                String gameJson = results.getString("chessGame");
+                int gameID = results.getInt("id");
+                String whiteUsername = results.getString("white_username");
+                String blackUsername = results.getString("black_username");
+                String gameName = results.getString("name");
+                String gameJson = results.getString("game_data");
 
                 ChessGame chessGame = new Gson().fromJson(gameJson, ChessGame.class);
                 games.add(new GameData(gameID, whiteUsername, blackUsername, gameName, chessGame));
@@ -85,35 +85,41 @@ public class MySQLGameDAO implements GameDAO{
     @Override
     public void updateGame(GameData game) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement("UPDATE game SET whiteUsername=?, blackUsername=?, gameName=?, chessGame=? WHERE gameID=?")) {
+            try (var statement = conn.prepareStatement(
+                    "UPDATE games SET white_username=?, black_username=?, name=?, game_data=? WHERE id=?")) {
+
                 statement.setString(1, game.whiteUsername());
                 statement.setString(2, game.blackUsername());
                 statement.setString(3, game.gameName());
-                statement.setString(4, new Gson().toJson(game.game()));
+                statement.setString(4, new Gson().toJson(game.game())); // serialized ChessGame
                 statement.setInt(5, game.gameID());
+
                 int rowsUpdated = statement.executeUpdate();
-                if (rowsUpdated == 0) throw new DataAccessException("Failed: Update didn't work");
+                if (rowsUpdated == 0) {
+                    throw new DataAccessException("Failed: Update didn't affect any rows");
+                }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new DataAccessException("SQL error during update: " + e.getMessage(), e);
         }
     }
+
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection();
              var statement = conn.prepareStatement(
-                     "SELECT gameID, whiteUsername, blackUsername, gameName, chessGame FROM game WHERE gameID = ?")) {
+                     "SELECT id, white_username, black_username, name, game_data FROM games WHERE id = ?")) {
 
             statement.setInt(1, gameID);
             var result = statement.executeQuery();
 
             if (result.next()) {
-                int id = result.getInt("gameID");
-                String whiteUsername = result.getString("whiteUsername");
-                String blackUsername = result.getString("blackUsername");
-                String gameName = result.getString("gameName");
-                String gameJson = result.getString("game");
+                int id = result.getInt("id");
+                String whiteUsername = result.getString("white_username");
+                String blackUsername = result.getString("black_username");
+                String gameName = result.getString("name");
+                String gameJson = result.getString("game_data");
 
                 ChessGame chessGame = new Gson().fromJson(gameJson, ChessGame.class);
 

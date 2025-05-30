@@ -13,7 +13,7 @@ public class MySQLUserDAO implements UserDAO {
     public void clear() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(
-                    "DELETE FROM users")) {
+                    "DELETE FROM users;")) {
                 statement.executeUpdate();
             }
         } catch (SQLException e) {
@@ -26,7 +26,7 @@ public class MySQLUserDAO implements UserDAO {
     public void insertUser(UserData user) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(
-                    "INSERT INTO user (username, password, email) VALUES(?, ?, ?)")) {
+                    "INSERT INTO users (username, password, email) VALUES(?, ?, ?)")) {
 
                 statement.setString(1, user.username());
                 statement.setString(2, BCrypt.hashpw(user.password(), BCrypt.gensalt()));
@@ -35,7 +35,7 @@ public class MySQLUserDAO implements UserDAO {
 
             }
         } catch (SQLException e) {
-            throw new DataAccessException("User already exists: " + user.username());
+            throw new DataAccessException("FAILED to insert user " + user.username());
         }
     }
 
@@ -43,7 +43,7 @@ public class MySQLUserDAO implements UserDAO {
     public UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection();
              var statement = conn.prepareStatement(
-                     "SELECT username, password, email FROM user WHERE username = ?")) {
+                     "SELECT username, password, email FROM users WHERE username = ?")) {
 
             statement.setString(1, username);
             var result = statement.executeQuery();
@@ -53,7 +53,7 @@ public class MySQLUserDAO implements UserDAO {
                 var email = result.getString("email");
                 return new UserData(username, password, email);
             } else {
-                throw new DataAccessException("User not found: " + username);
+                return null;
             }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to retrieve user: " + username, e);
