@@ -30,9 +30,15 @@ public abstract class BaseHandler {
             return logic.call();
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (msg != null && msg.contains("unauthorized")) return error(res, 401, msg);
-            if (msg != null && msg.contains("bad request")) return error(res, 400, msg);
-            if (msg != null && msg.contains("already taken")) return error(res, 403, msg);
+            if (msg != null && msg.contains("unauthorized")){
+                return error(res, 401, msg);
+            }
+            if (msg != null && msg.contains("bad request")){
+                return error(res, 400, msg);
+            }
+            if (msg != null && msg.contains("already taken")){
+                return error(res, 403, msg);
+            }
             return error(res, 500, msg != null ? msg : "internal server error");
         }
     }
