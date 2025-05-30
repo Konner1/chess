@@ -14,7 +14,7 @@ public class MySQLUserDAOTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        new ClearService().clearApplication();  // ensures DB is clean
+        new ClearService().clearApplication();
     }
 
     @Test
@@ -25,7 +25,7 @@ public class MySQLUserDAOTest {
     @Test
     public void testInsertUserFail() throws Exception {
         userdao.insertUser(testUser);
-        assertThrows(DataAccessException.class, () -> userdao.insertUser(testUser));  // duplicate user
+        assertThrows(DataAccessException.class, () -> userdao.insertUser(testUser));
     }
 
     @Test
@@ -35,8 +35,8 @@ public class MySQLUserDAOTest {
 
         assertEquals(testUser.username(), found.username());
         assertEquals(testUser.email(), found.email());
-        assertNotNull(found.password());  // should be hashed
-        assertNotEquals("password", found.password());  // definitely shouldn't match raw
+        assertNotNull(found.password());
+        assertNotEquals("password", found.password());
     }
 
     @Test
