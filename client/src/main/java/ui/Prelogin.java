@@ -33,7 +33,7 @@ public class Prelogin {
                 switch (command) {
                     case "help" -> printHelp();
                     case "quit" -> {
-                        return null;  // main loop will exit
+                        return null;
                     }
                     case "register" -> {
                         if (input.length != 4) {
