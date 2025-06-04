@@ -10,19 +10,16 @@ import static java.lang.System.out;
 
 public class Postlogin {
 
-    /* ── instance data ───────────────────────────────────────────── */
     private final ServerFacade server;
     private final String authToken;
     private final Scanner scanner = new Scanner(System.in);
     private List<GameData> lastListedGames = new ArrayList<>();
 
-    /* ── ctor ────────────────────────────────────────────────────── */
     public Postlogin(ServerFacade server, String authToken) {
         this.server = server;
         this.authToken = authToken;
     }
 
-    /* ── public entry ─────────────────────────────────────────────── */
     public State run() {
         out.println("♕ Welcome to the game!  Type 'help' for options.");
 
@@ -54,7 +51,6 @@ public class Postlogin {
         }
     }
 
-    /* ── command helpers ──────────────────────────────────────────── */
     private void doCreate(String[] input) throws ResponseException {
         if (input.length != 2) { out.println("Usage: create <gameName>"); return; }
         server.createGame(input[1], authToken);
@@ -105,23 +101,20 @@ public class Postlogin {
 
         int gameID = lastListedGames.get(idx).gameID();
 
-        /* call the real observe endpoint */
         server.observeGame(gameID, authToken);
 
         out.printf("Observing game %d.%n", gameID);
         DrawBoard.print(System.out, true);
     }
 
-
-    /* ── help text ───────────────────────────────────────────────── */
     private void printHelp() {
         out.println("Commands:");
-        out.println("  create <name>              - Create a new game");
-        out.println("  list                       - List all games");
-        out.println("  join <#> <WHITE|BLACK>     - Join a game as a player");
-        out.println("  observe <#>                - Observe a game");
-        out.println("  logout                     - Log out");
-        out.println("  quit                       - Quit program");
-        out.println("  help                       - Show this menu");
+        out.println("  create <name> - Create a new game");
+        out.println("  list - List all games");
+        out.println("  join <#> <WHITE|BLACK> - Join a game as a player");
+        out.println("  observe <#> - Observe a game");
+        out.println("  logout - Log out");
+        out.println("  quit - Quit program");
+        out.println("  help - Show this menu");
     }
 }

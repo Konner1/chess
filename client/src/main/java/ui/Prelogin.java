@@ -70,8 +70,8 @@ public class Prelogin {
     private void printHelp() {
         out.println("Commands:");
         out.println("  register <username> <password> <email> - Create a new account");
-        out.println("  login <username> <password>           - Log into your account");
-        out.println("  quit                                   - Exit the game");
-        out.println("  help                                   - Show available commands");
+        out.println("  login <username> <password> - Log into your account");
+        out.println("  quit - Exit the game");
+        out.println("  help - Show available commands");
     }
 }
