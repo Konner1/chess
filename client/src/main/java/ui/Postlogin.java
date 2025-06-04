@@ -73,9 +73,13 @@ public class Postlogin {
     }
 
     private void doJoin(String[] input) throws ResponseException {
-        if (input.length != 3) { out.println("Usage: join <game#> <WHITE|BLACK>"); return; }
-        int idx = Integer.parseInt(input[1]) - 1;
-        if (idx < 0 || idx >= lastListedGames.size()) { out.println("Invalid game number."); return; }
+        if (input.length != 3) {
+            out.println("Usage: join <game#> <WHITE|BLACK>");
+            return;
+        }
+
+        GameData game = getGameByIndex(input[1]);
+        if (game == null) return;
 
         String color = input[2].toUpperCase();
         if (!color.equals("WHITE") && !color.equals("BLACK")) {
@@ -83,29 +87,49 @@ public class Postlogin {
             return;
         }
 
-        int gameID = lastListedGames.get(idx).gameID();
-        server.joinGame(gameID, color, authToken);
-        out.printf("Joined game %d as %s.%n", gameID, color);
-        if(color.equals("WHITE")){
+        server.joinGame(game.gameID(), color, authToken);
+        out.printf("Joined game %d as %s.%n", game.gameID(), color);
+
+        if (color.equals("WHITE")) {
             DrawBoard.print(System.out, true);
-        } else{
+        } else {
             DrawBoard.print(System.out, false);
         }
-
     }
 
     private void doObserve(String[] input) throws ResponseException {
-        if (input.length != 2) { out.println("Usage: observe <game#>"); return; }
-        int idx = Integer.parseInt(input[1]) - 1;
-        if (idx < 0 || idx >= lastListedGames.size()) { out.println("Invalid game number."); return; }
+        if (input.length != 2) {
+            out.println("Usage: observe <game#>");
+            return;
+        }
+        GameData game = getGameByIndex(input[1]);
+        if (game == null) return;
 
-        int gameID = lastListedGames.get(idx).gameID();
+        int gameID = game.gameID();
 
         server.observeGame(gameID, authToken);
-
         out.printf("Observing game %d.%n", gameID);
-        DrawBoard.print(System.out, true);
+        DrawBoard.print(System.out, true); // Always white perspective for observing
     }
+
+    private GameData getGameByIndex(String inputIndex) throws ResponseException {
+        int idx = Integer.parseInt(inputIndex) - 1;
+        if (idx < 0) {
+            out.println("Invalid game number.");
+            return null;
+        }
+
+        GameData[] games = server.listGames(authToken);
+        if (idx >= games.length) {
+            out.println("Invalid game number.");
+            return null;
+        }
+        lastListedGames = Arrays.asList(games);
+
+        return games[idx];
+    }
+
+
 
     private void printHelp() {
         out.println("Commands:");
