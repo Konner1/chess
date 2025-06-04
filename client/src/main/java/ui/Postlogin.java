@@ -80,7 +80,9 @@ public class Postlogin {
         }
 
         GameData game = getGameByIndex(input[1]);
-        if (game == null) return;
+        if (game == null) {
+            return;
+        }
 
         String color = input[2].toUpperCase();
         if (!color.equals("WHITE") && !color.equals("BLACK")) {
@@ -104,7 +106,9 @@ public class Postlogin {
             return;
         }
         GameData game = getGameByIndex(input[1]);
-        if (game == null) return;
+        if (game == null) {
+            return;
+        }
 
         int gameID = game.gameID();
 
