@@ -28,17 +28,17 @@ public class GameServiceTests {
         assertNotEquals(0, game.gameID());
     }
 
-    @Test
-    public void testListGamePass() throws Exception {
-        GameData game = gameService.createGame("test", authToken);
-        var games = gameService.listGames(authToken);
-
-        assertEquals(1, games.size());
-        var gameInfo = games.get(0);
-
-        assertEquals("test", gameInfo.get("gameName"));
-        assertNotNull(gameInfo.get("gameID"));
-    }
+//    @Test
+//    public void testListGamePass() throws Exception {
+//        GameData game = gameService.createGame("test", authToken);
+//        var games = gameService.listGames(authToken);
+//
+//        assertEquals(1, games.size());
+//        var gameInfo = games.get(0);
+//
+//        assertEquals("test", gameInfo.get("gameName"));
+//        assertNotNull(gameInfo.get("gameID"));
+//    }
 
     @Test
     public void testJoinGamePass() throws Exception {

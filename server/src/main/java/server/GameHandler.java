@@ -19,7 +19,7 @@ public class GameHandler extends BaseHandler {
 
     public Route listGames = (Request req, Response res) -> handleSafely(req, res, () -> {
         String authToken = req.headers("Authorization");
-        List<Map<String, Object>> games = new GameService().listGames(authToken);
+        GameData[] games = new GameService().listGames(authToken);
         return success(res, Map.of("games", games));
     });
 
@@ -43,6 +43,7 @@ public class GameHandler extends BaseHandler {
         res.status(200);
         return "{}";
     });
+
 }
 
 

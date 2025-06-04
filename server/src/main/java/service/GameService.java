@@ -34,24 +34,13 @@ public class GameService {
         return gamedata;
     }
 
-    public List<Map<String, Object>> listGames(String authToken) throws Exception {
+    public GameData[] listGames(String authToken) throws Exception {
         if (authToken == null || authDAO.getAuth(authToken) == null) {
             throw new Exception("unauthorized");
         }
 
-        var allGames = gameDAO.listGames();
-
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (var game : allGames) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("gameID", game.gameID());
-            map.put("whiteUsername", game.whiteUsername());
-            map.put("blackUsername", game.blackUsername());
-            map.put("gameName", game.gameName());
-            result.add(map);
-        }
-
-        return result;
+        List<GameData> allGames = gameDAO.listGames();
+        return allGames.toArray(new GameData[0]);
     }
 
     public void joinGame(String authToken, String color, int gameID) throws Exception {
