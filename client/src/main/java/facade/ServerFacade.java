@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import ui.*;
 
 import  exception.ResponseException;
 
@@ -52,8 +53,10 @@ public class ServerFacade {
 
     public GameData[] listGames(String authToken) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, null, authToken, GameData[].class);
+        GameResult result = this.makeRequest("GET", path, null, authToken, GameResult.class);
+        return result.games();
     }
+
 
     public void joinGame(int gameID, String playerColor, String authToken) throws ResponseException {
         var path = "/game";
