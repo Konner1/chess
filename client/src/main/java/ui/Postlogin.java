@@ -104,9 +104,14 @@ public class Postlogin {
         if (idx < 0 || idx >= lastListedGames.size()) { out.println("Invalid game number."); return; }
 
         int gameID = lastListedGames.get(idx).gameID();
-        server.joinGame(gameID, null, authToken);
+
+        /* call the real observe endpoint */
+        server.observeGame(gameID, authToken);
+
         out.printf("Observing game %d.%n", gameID);
+        DrawBoard.print(System.out, true);
     }
+
 
     /* ── help text ───────────────────────────────────────────────── */
     private void printHelp() {

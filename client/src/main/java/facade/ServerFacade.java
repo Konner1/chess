@@ -64,6 +64,13 @@ public class ServerFacade {
         this.makeRequest("PUT", path, request, authToken, Void.class);
     }
 
+    public void observeGame(int gameID, String authToken) throws ResponseException {
+        var path = "/observe";
+        var request = Map.of("gameID", gameID);
+        this.makeRequest("PUT", path, request, authToken, Void.class);
+    }
+
+
     public void clear() throws ResponseException {
         this.makeRequest("DELETE", "/db", null, null, Void.class);
     }

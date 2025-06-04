@@ -44,6 +44,25 @@ public class GameHandler extends BaseHandler {
         return "{}";
     });
 
+    public Route observeGame = (Request req, Response res) -> handleSafely(req, res, () -> {
+        String authToken = req.headers("Authorization");
+        Map<String, Object> body = gson.fromJson(req.body(), Map.class);
+
+        if (body == null || !body.containsKey("gameID")) {
+            throw new Exception("bad request");
+        }
+        Object idObj = body.get("gameID");
+        if (!(idObj instanceof Number)) {
+            throw new Exception("bad request");
+        }
+        int gameID = ((Number) idObj).intValue();
+
+        new GameService().observeGame(authToken, gameID);
+        res.status(200);
+        return "{}";
+    });
+
+
 }
 
 
