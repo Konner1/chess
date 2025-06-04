@@ -16,19 +16,27 @@ public class Repl {
         while (true) {
             if (state == State.SIGNEDOUT) {
                 Prelogin prelogin = new Prelogin(server);
-                State result = prelogin.run();
+                LoginResult result = prelogin.run();
 
                 if (result == null) {
                     System.out.println("Goodbye!");
                     return;
                 }
 
-                state = result;
-            }
+                state = result.state();
 
-            System.out.println("Successfully signed in. (Postlogin not yet implemented)");
-            state = State.SIGNEDOUT;
+                Postlogin postlogin = new Postlogin(server, result.authToken());
+                State postResult = postlogin.run();
+                if (postResult == null) {
+                    System.out.println("Goodbye!");
+                    return;
+                }
+
+                state = postResult;
+            }
         }
     }
 }
+
+
 

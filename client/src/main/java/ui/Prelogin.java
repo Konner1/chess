@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 import static java.lang.System.out;
 
-
 public class Prelogin {
 
     private final Scanner scanner;
@@ -19,8 +18,8 @@ public class Prelogin {
         this.scanner = new Scanner(System.in);
     }
 
-    public State run() {
-        out.println("♕ Welcome to Chess! Enter 'help' to get started.");
+    public LoginResult run() {
+        out.println("♕ Welcome to Chess! Type help to get started. ♕");
 
         while (true) {
             out.print("\n[LOGGED OUT] >>> ");
@@ -43,7 +42,7 @@ public class Prelogin {
                         var success = server.register(input[1], input[2], input[3]);
                         if (success != null) {
                             out.println("Registered and logged in!");
-                            return State.SIGNEDIN;
+                            return new LoginResult(State.SIGNEDIN, success.authToken());
                         }
                     }
                     case "login" -> {
@@ -54,7 +53,7 @@ public class Prelogin {
                         var success = server.login(input[1], input[2]);
                         if (success != null) {
                             out.println("Logged in!");
-                            return State.SIGNEDIN;
+                            return new LoginResult(State.SIGNEDIN, success.authToken());
                         }
                     }
                     default -> {
@@ -73,5 +72,6 @@ public class Prelogin {
         out.println("  register <username> <password> <email> - Create a new account");
         out.println("  login <username> <password>           - Log into your account");
         out.println("  quit                                   - Exit the game");
+        out.println("  help                                   - Show available commands");
     }
 }
