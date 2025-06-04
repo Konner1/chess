@@ -98,7 +98,7 @@ public class Postlogin {
         if (idx < 0 || idx >= lastListedGames.size()) { out.println("Invalid game number."); return; }
 
         int gameID = lastListedGames.get(idx).gameID();
-        server.joinGame(gameID, null, authToken);     // null playerColor = observer (server accepts)
+        server.joinGame(gameID, null, authToken);
         out.printf("Observing game %d.%n", gameID);
     }
 
