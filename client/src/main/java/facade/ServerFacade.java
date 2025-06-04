@@ -82,6 +82,9 @@ public class ServerFacade {
             writeBody(request, http);
             http.connect();
             throwIfNotSuccessful(http);
+            if (responseClass == Void.class) {
+                return null;
+            }
             return readBody(http, responseClass);
         } catch (ResponseException ex) {
             throw ex;

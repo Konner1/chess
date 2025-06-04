@@ -9,118 +9,108 @@ import java.util.*;
 import static java.lang.System.out;
 
 public class Postlogin {
+
+    /* ── instance data ───────────────────────────────────────────── */
     private final ServerFacade server;
     private final String authToken;
     private final Scanner scanner = new Scanner(System.in);
     private List<GameData> lastListedGames = new ArrayList<>();
 
+    /* ── ctor ────────────────────────────────────────────────────── */
     public Postlogin(ServerFacade server, String authToken) {
         this.server = server;
         this.authToken = authToken;
     }
 
+    /* ── public entry ─────────────────────────────────────────────── */
     public State run() {
-        out.println("♕ Welcome to the game! Type 'help' for options.");
+        out.println("♕ Welcome to the game!  Type 'help' for options.");
 
         while (true) {
             out.print("\n[SIGNED IN] >>> ");
             String[] input = scanner.nextLine().trim().split(" ");
-            if (input.length == 0 || input[0].isBlank()) continue;
+            if (input.length == 0 || input[0].isBlank()) { continue; }
 
-            String command = input[0].toLowerCase();
+            String cmd = input[0].toLowerCase();
 
             try {
-                switch (command) {
-                    case "help" -> printHelp();
+                switch (cmd) {
+                    case "help"    -> printHelp();
+                    case "logout"  -> { server.logout(authToken); out.println("Logged out.");     return State.SIGNEDOUT; }
+                    case "quit"    -> { out.println("Goodbye!");                                  return null; }
 
-                    case "logout" -> {
-                        server.logout(authToken);
-                        out.println("Logged out.");
-                        return State.SIGNEDOUT;
-                    }
+                    case "create"  -> doCreate(input);
+                    case "list"    -> doList();
+                    case "join"    -> doJoin(input);
+                    case "observe" -> doObserve(input);
 
-                    case "create" -> {
-                        if (input.length != 2) {
-                            out.println("Usage: create <gameName>");
-                            break;
-                        }
-                        server.createGame(input[1], authToken);
-                        out.println("Game created.");
-                    }
-
-                    case "list" -> {
-                        GameData[] games = server.listGames(authToken);
-                        lastListedGames = Arrays.asList(games);
-                        for (int i = 0; i < games.length; i++) {
-                            var g = games[i];
-                            out.printf("%d. %s (White: %s, Black: %s)%n",
-                                    i + 1,
-                                    g.getGameName(),
-                                    g.getWhiteUsername() != null ? g.getWhiteUsername() : "none",
-                                    g.getBlackUsername() != null ? g.getBlackUsername() : "none"
-                            );
-                        }
-                    }
-
-                    case "join" -> {
-                        if (input.length != 3) {
-                            out.println("Usage: join <gameNumber> <WHITE|BLACK>");
-                            break;
-                        }
-                        int index = Integer.parseInt(input[1]) - 1;
-                        if (index < 0 || index >= lastListedGames.size()) {
-                            out.println("Invalid game number.");
-                            break;
-                        }
-                        String color = input[2].toUpperCase();
-                        if (!color.equals("WHITE") && !color.equals("BLACK")) {
-                            out.println("Color must be WHITE or BLACK.");
-                            break;
-                        }
-                        int gameID = lastListedGames.get(index).getGameID();
-                        server.joinGame(gameID, color, authToken);
-                        out.printf("Joined game %d as %s.%n", gameID, color);
-                    }
-
-                    case "observe" -> {
-                        if (input.length != 2) {
-                            out.println("Usage: observe <gameNumber>");
-                            break;
-                        }
-                        int index = Integer.parseInt(input[1]) - 1;
-                        if (index < 0 || index >= lastListedGames.size()) {
-                            out.println("Invalid game number.");
-                            break;
-                        }
-                        int gameID = lastListedGames.get(index).getGameID();
-                        server.joinGame(gameID, null, authToken);  // join as observer (no color)
-                        out.printf("Observing game %d.%n", gameID);
-                    }
-
-                    case "quit" -> {
-                        out.println("Goodbye!");
-                        return null;
-                    }
-
-                    default -> out.println("Unknown command. Try 'help'.");
+                    default        -> out.println("Unknown command. Try 'help'.");
                 }
             } catch (ResponseException e) {
                 out.printf("Error: %s%n", e.getMessage());
             } catch (NumberFormatException e) {
-                out.println("Game number must be a valid number.");
+                out.println("Game number must be a valid integer.");
             }
         }
     }
 
+    /* ── command helpers ──────────────────────────────────────────── */
+    private void doCreate(String[] input) throws ResponseException {
+        if (input.length != 2) { out.println("Usage: create <gameName>"); return; }
+        server.createGame(input[1], authToken);
+        out.println("Game created.");
+    }
+
+    private void doList() throws ResponseException {
+        GameData[] games = server.listGames(authToken);
+        if (games.length == 0) { out.println("No games available."); return; }
+
+        lastListedGames = Arrays.asList(games);
+        for (int i = 0; i < games.length; i++) {
+            GameData g = games[i];
+            out.printf("%d. %s (White: %s, Black: %s)%n",
+                    i + 1,
+                    g.gameName(),
+                    g.whiteUsername() != null ? g.whiteUsername() : "none",
+                    g.blackUsername()  != null ? g.blackUsername()  : "none");
+        }
+    }
+
+    private void doJoin(String[] input) throws ResponseException {
+        if (input.length != 3) { out.println("Usage: join <game#> <WHITE|BLACK>"); return; }
+        int idx = Integer.parseInt(input[1]) - 1;
+        if (idx < 0 || idx >= lastListedGames.size()) { out.println("Invalid game number."); return; }
+
+        String color = input[2].toUpperCase();
+        if (!color.equals("WHITE") && !color.equals("BLACK")) {
+            out.println("Color must be WHITE or BLACK.");
+            return;
+        }
+
+        int gameID = lastListedGames.get(idx).gameID();
+        server.joinGame(gameID, color, authToken);
+        out.printf("Joined game %d as %s.%n", gameID, color);
+    }
+
+    private void doObserve(String[] input) throws ResponseException {
+        if (input.length != 2) { out.println("Usage: observe <game#>"); return; }
+        int idx = Integer.parseInt(input[1]) - 1;
+        if (idx < 0 || idx >= lastListedGames.size()) { out.println("Invalid game number."); return; }
+
+        int gameID = lastListedGames.get(idx).gameID();
+        server.joinGame(gameID, null, authToken);     // null playerColor = observer (server accepts)
+        out.printf("Observing game %d.%n", gameID);
+    }
+
+    /* ── help text ───────────────────────────────────────────────── */
     private void printHelp() {
         out.println("Commands:");
-        out.println("  create <Name>                 - Create a new game");
-        out.println("  list                          - List all games");
-        out.println("  join <Game#> <WHITE|BLACK>    - Join a game as a player");
-        out.println("  observe <Game#>               - Observe a game");
-        out.println("  logout                        - Log out");
-        out.println("  quit                          - Quit the client");
-        out.println("  help                          - Show this menu");
+        out.println("  create <name>              - Create a new game");
+        out.println("  list                       - List all games");
+        out.println("  join <#> <WHITE|BLACK>     - Join a game as a player");
+        out.println("  observe <#>                - Observe a game");
+        out.println("  logout                     - Log out");
+        out.println("  quit                       - Quit program");
+        out.println("  help                       - Show this menu");
     }
 }
-
