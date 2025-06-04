@@ -90,6 +90,12 @@ public class Postlogin {
         int gameID = lastListedGames.get(idx).gameID();
         server.joinGame(gameID, color, authToken);
         out.printf("Joined game %d as %s.%n", gameID, color);
+        if(color.equals("WHITE")){
+            DrawBoard.print(System.out, true);
+        } else{
+            DrawBoard.print(System.out, false);
+        }
+
     }
 
     private void doObserve(String[] input) throws ResponseException {
