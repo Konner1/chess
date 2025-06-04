@@ -14,7 +14,7 @@ public class GameHandler extends BaseHandler {
         String authToken = req.headers("Authorization");
         GameData request = gson.fromJson(req.body(), GameData.class);
         GameData result = new GameService().createGame(request.gameName(), authToken);
-        return success(res, Map.of("gameID", result.gameID()));
+        return success(res, result);  // ✅ return full GameData
     });
 
     public Route listGames = (Request req, Response res) -> handleSafely(req, res, () -> {
