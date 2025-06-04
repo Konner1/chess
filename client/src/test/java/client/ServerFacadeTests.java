@@ -13,10 +13,6 @@ public class ServerFacadeTests {
     private static Server server;
     private static ServerFacade facade;
 
-    private static final String USERNAME = "konner";
-    private static final String PASSWORD = "pass";
-    private static final String EMAIL = "konner@email.com";
-
     private String authToken;
 
     @BeforeAll
@@ -39,21 +35,21 @@ public class ServerFacadeTests {
 
     @Test
     public void registerPass() throws Exception {
-        AuthData auth = facade.register(USERNAME, PASSWORD, EMAIL);
+        AuthData auth = facade.register("konner", "pass", "konner@email.com");
         assertNotNull(auth.authToken());
         authToken = auth.authToken();
     }
 
     @Test
     public void registerFail() throws Exception {
-        facade.register(USERNAME, PASSWORD, EMAIL);
-        assertThrows(Exception.class, () -> facade.register(USERNAME, PASSWORD, EMAIL));
+        facade.register("konner", "pass", "konner@email.com");
+        assertThrows(Exception.class, () -> facade.register("konner", "pass", "konner@email.com"));
     }
 
     @Test
     public void loginPass() throws Exception {
-        facade.register(USERNAME, PASSWORD, EMAIL);
-        AuthData auth = facade.login(USERNAME, PASSWORD);
+        facade.register("konner", "pass", "konner@email.com");
+        AuthData auth = facade.login("konner", "pass");
         assertNotNull(auth.authToken());
     }
 
@@ -64,7 +60,7 @@ public class ServerFacadeTests {
 
     @Test
     public void logoutPass() throws Exception {
-        AuthData auth = facade.register(USERNAME, PASSWORD, EMAIL);
+        AuthData auth = facade.register("konner", "pass", "konner@email.com");
         assertDoesNotThrow(() -> facade.logout(auth.authToken()));
     }
 
@@ -75,7 +71,7 @@ public class ServerFacadeTests {
 
     @Test
     public void createGamePass() throws Exception {
-        AuthData auth = facade.register(USERNAME, PASSWORD, EMAIL);
+        AuthData auth = facade.register("konner", "pass", "konner@email.com");
         GameData game = facade.createGame("MyGame", auth.authToken());
         assertNotNull(game);
         assertEquals("MyGame", game.gameName());
@@ -88,7 +84,7 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesPass() throws Exception {
-        AuthData auth = facade.register(USERNAME, PASSWORD, EMAIL);
+        AuthData auth = facade.register("konner", "pass", "konner@email.com");
         facade.createGame("Game1", auth.authToken());
         GameData[] games = facade.listGames(auth.authToken());
         assertTrue(games.length >= 1);
@@ -101,7 +97,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGamePass() throws Exception {
-        AuthData auth = facade.register(USERNAME, PASSWORD, EMAIL);
+        AuthData auth = facade.register("konner", "pass", "konner@email.com");
         GameData game = facade.createGame("Joinable", auth.authToken());
         assertDoesNotThrow(() -> facade.joinGame(game.gameID(), "WHITE", auth.authToken()));
     }
@@ -113,7 +109,7 @@ public class ServerFacadeTests {
 
     @Test
     public void observeGamePass() throws Exception {
-        AuthData auth = facade.register(USERNAME, PASSWORD, EMAIL);
+        AuthData auth = facade.register("konner", "pass", "konner@email.com");
         GameData game = facade.createGame("Observable", auth.authToken());
         assertDoesNotThrow(() -> facade.observeGame(game.gameID(), auth.authToken()));
     }
