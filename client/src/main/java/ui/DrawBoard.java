@@ -9,12 +9,12 @@ public class DrawBoard {
     private static final String[][] INITIAL_BOARD = new String[8][8];
 
     static {
-        String[] backRank = { BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK };
-        String[] whiteBackRank = { WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK };
+        String[] backRank = { WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK };
+        String[] whiteBackRank = { BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK };
 
         INITIAL_BOARD[0] = backRank;
         for (int col = 0; col < 8; col++) {
-            INITIAL_BOARD[1][col] = BLACK_PAWN;
+            INITIAL_BOARD[1][col] = WHITE_PAWN;
         }
 
         for (int row = 2; row <= 5; row++) {
@@ -24,7 +24,7 @@ public class DrawBoard {
         }
 
         for (int col = 0; col < 8; col++) {
-            INITIAL_BOARD[6][col] = WHITE_PAWN;
+            INITIAL_BOARD[6][col] = BLACK_PAWN;
         }
         INITIAL_BOARD[7] = whiteBackRank;
     }

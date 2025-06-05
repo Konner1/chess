@@ -33,14 +33,14 @@ public class Postlogin {
 
             try {
                 switch (cmd) {
-                    case "help"    -> printHelp();
-                    case "logout"  -> { server.logout(authToken); out.println("Logged out.");     return State.SIGNEDOUT; }
-                    case "quit"    -> { out.println("Goodbye!");                                  return null; }
+                    case "h", "help"    -> printHelp();
+                    case "l", "logout"  -> { server.logout(authToken); out.println("Logged out.");     return State.SIGNEDOUT; }
+                    case "q", "quit"    -> { out.println("Goodbye!");                                  return null; }
 
-                    case "create"  -> doCreate(input);
-                    case "list"    -> doList();
-                    case "join"    -> doJoin(input);
-                    case "observe" -> doObserve(input);
+                    case "c", "create"  -> doCreate(input);
+                    case "li", "list"    -> doList();
+                    case "j", "join"    -> doJoin(input);
+                    case "o", "observe" -> doObserve(input);
 
                     default        -> out.println("Unknown command. Try 'help'.");
                 }
@@ -137,13 +137,11 @@ public class Postlogin {
 
 
     private void printHelp() {
-        out.println("Commands:");
-        out.println("  create <name> - Create a new game");
-        out.println("  list - List all games");
-        out.println("  join <#> <WHITE|BLACK> - Join a game as a player");
-        out.println("  observe <#> - Observe a game");
-        out.println("  logout - Log out");
-        out.println("  quit - Quit program");
-        out.println("  help - Show this menu");
+        out.println("Options:");
+        out.println("  'c', 'create' <NAME> - Create a new game");
+        out.println("  'li', 'list' - List all games");
+        out.println("  'j', 'join' <#> <WHITE|BLACK> - Join a game as a player");
+        out.println("  'o' 'observe' <#> - Observe a game");
+        out.println("  'l', 'logout' - Log out");
     }
 }

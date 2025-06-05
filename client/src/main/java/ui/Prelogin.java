@@ -25,44 +25,53 @@ public class Prelogin {
             out.print("\n[LOGGED OUT] >>> ");
             String[] input = scanner.nextLine().trim().split(" ");
 
-            if (input.length == 0 || input[0].isBlank()){
+            if (input.length == 0 || input[0].isBlank()) {
                 continue;
             }
 
             String command = input[0].toLowerCase();
+
             try {
-                switch (command) {
-                    case "help" -> printHelp();
-                    case "quit" -> {
-                        return null;
-                    }
-                    case "register" -> {
-                        if (input.length != 4) {
-                            out.println("Usage: register <username> <password> <email>");
-                            break;
-                        }
-                        var success = server.register(input[1], input[2], input[3]);
-                        if (success != null) {
-                            out.println("Registered and logged in!");
-                            return new LoginResult(State.SIGNEDIN, success.authToken());
-                        }
-                    }
-                    case "login" -> {
-                        if (input.length != 3) {
-                            out.println("Usage: login <username> <password>");
-                            break;
-                        }
-                        var success = server.login(input[1], input[2]);
-                        if (success != null) {
-                            out.println("Logged in!");
-                            return new LoginResult(State.SIGNEDIN, success.authToken());
-                        }
-                    }
-                    default -> {
-                        out.println("Unknown command.");
-                        printHelp();
-                    }
+                if (command.equals("help")|| command.equals("h")) {
+                    printHelp();
+                    continue;
                 }
+
+                if (command.equals("quit")|| command.equals("q")) {
+                    return null;
+                }
+
+                if (command.equals("register") || command.equals("r")) {
+                    if (input.length != 4) {
+                        out.println("Usage: register <USERNAME> <PASSWORD> <EMAIL>");
+                        continue;
+                    }
+
+                    var success = server.register(input[1], input[2], input[3]);
+                    if (success != null) {
+                        out.println("Registered and logged in!");
+                        return new LoginResult(State.SIGNEDIN, success.authToken());
+                    }
+                    continue;
+                }
+
+                if (command.equals("login")|| command.equals("l")) {
+                    if (input.length != 3) {
+                        out.println("Usage: login <USERNAME> <PASSWORD>");
+                        continue;
+                    }
+
+                    var success = server.login(input[1], input[2]);
+                    if (success != null) {
+                        out.println("Logged in!");
+                        return new LoginResult(State.SIGNEDIN, success.authToken());
+                    }
+                    continue;
+                }
+
+                out.println("Unknown command.");
+                printHelp();
+
             } catch (ResponseException e) {
                 out.printf("Error: %s%n", e.getMessage());
             }
@@ -70,10 +79,10 @@ public class Prelogin {
     }
 
     private void printHelp() {
-        out.println("Commands:");
-        out.println("  register <username> <password> <email> - Create a new account");
-        out.println("  login <username> <password> - Log into your account");
-        out.println("  quit - Exit the game");
-        out.println("  help - Show available commands");
+        out.println("Options:");
+        out.println("  'r', 'register' <USERNAME> <PASSWORD> <EMAIL> - Create a new account");
+        out.println("  'l', 'login' <USERNAME> <PASSWORD> - Log into your account");
+        out.println("  'q', 'quit' - Exit the game");
+        out.println("  'h', 'help' - Show available commands");
     }
 }
