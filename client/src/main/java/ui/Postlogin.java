@@ -93,10 +93,10 @@ public class Postlogin {
         server.joinGame(game.gameID(), color, authToken);
         out.printf("Joined game %d as %s.%n", game.gameID(), color);
 
-        // TEMPORARY EMPTY BOARD - replace with real game later
-        ChessGame tempGame = new ChessGame();
-        boolean isWhite = color.equals("WHITE");
-        DrawBoard.print(System.out, tempGame, isWhite);
+        ChessGame.TeamColor teamColor = color.equals("WHITE") ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+        GamePlay gamePlay = new GamePlay(server.getServerUrl(), authToken, game.gameID(), teamColor);
+        gamePlay.run();
+
     }
 
 
@@ -116,9 +116,8 @@ public class Postlogin {
         server.observeGame(gameID, authToken);
         out.printf("Observing game %d.%n", gameID);
 
-        // TEMPORARY EMPTY BOARD - replace with real game later
-        ChessGame tempGame = new ChessGame();
-        DrawBoard.print(System.out, tempGame, true); // Always white perspective for observing
+        GamePlay gamePlay = new GamePlay(server.getServerUrl(), authToken, game.gameID(), null); // null means observer
+        gamePlay.run();
     }
 
     private GameData getGameByIndex(String inputIndex) throws ResponseException {
