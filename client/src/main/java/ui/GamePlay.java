@@ -23,7 +23,7 @@ public class GamePlay implements DisplayHandler {
     public GamePlay(String serverUrl, String authToken, int gameID, ChessGame.TeamColor playerColor) throws ResponseException {
         this.authToken = authToken;
         this.gameID = gameID;
-        this.color = playerColor;
+        this.color = (playerColor != null) ? playerColor : ChessGame.TeamColor.WHITE;
         this.ws = new WebSocketFacade(serverUrl, this);
 
         ws.sendCommand(new ConnectCommand(authToken, gameID));
