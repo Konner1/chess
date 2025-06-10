@@ -93,18 +93,19 @@ public class Postlogin {
         server.joinGame(game.gameID(), color, authToken);
         out.printf("Joined game %d as %s.%n", game.gameID(), color);
 
-        if (color.equals("WHITE")) {
-            DrawBoard.print(System.out, true);
-        } else {
-            DrawBoard.print(System.out, false);
-        }
+        // TEMPORARY EMPTY BOARD - replace with real game later
+        ChessGame tempGame = new ChessGame();
+        boolean isWhite = color.equals("WHITE");
+        DrawBoard.print(System.out, tempGame, isWhite);
     }
+
 
     private void doObserve(String[] input) throws ResponseException {
         if (input.length != 2) {
             out.println("Usage: observe <game#>");
             return;
         }
+
         GameData game = getGameByIndex(input[1]);
         if (game == null) {
             return;
@@ -114,7 +115,10 @@ public class Postlogin {
 
         server.observeGame(gameID, authToken);
         out.printf("Observing game %d.%n", gameID);
-        DrawBoard.print(System.out, true); // Always white perspective for observing
+
+        // TEMPORARY EMPTY BOARD - replace with real game later
+        ChessGame tempGame = new ChessGame();
+        DrawBoard.print(System.out, tempGame, true); // Always white perspective for observing
     }
 
     private GameData getGameByIndex(String inputIndex) throws ResponseException {
