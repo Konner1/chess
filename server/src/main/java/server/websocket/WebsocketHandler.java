@@ -1,4 +1,3 @@
-// server/websocket/WebsocketHandler.java
 package server.websocket;
 
 import chess.ChessGame;
@@ -25,7 +24,6 @@ public class WebsocketHandler {
     private static final Gson gson = new Gson();
     private static final ConnectionManager connections = Server.connectionManager;
 
-    // use your instance DAOs, not static calls
     private final AuthDAO authDAO = new MySQLAuthDAO();
     private final GameDAO gameDAO = new MySQLGameDAO();
 
@@ -70,19 +68,15 @@ public class WebsocketHandler {
         String white = game.whiteUsername();
         String black = game.blackUsername();
 
-        // register connection
         connections.addConnection(cmd.getGameID(), user, session);
 
-        // send current board to just this client
         session.getRemote().sendString(gson.toJson(new LoadMessage(game.game())));
 
-        // build the correct notification
         String note;
         if (user.equals(white))       note = user + " joined as WHITE.";
         else if (user.equals(black))  note = user + " joined as BLACK.";
         else                           note = user + " joined as an observer.";
 
-        // broadcast to everyone else
         connections.broadcast(cmd.getGameID(),
                 new NotificationMessage(note),
                 session);
@@ -96,25 +90,20 @@ public class WebsocketHandler {
         if (auth == null) throw new DataAccessException("Invalid auth");
         if (game == null) throw new DataAccessException("Game not found");
 
-        // ← NEW: if the game is already over, error out immediately
         if (game.game().isGameOver()) {
             throw new InvalidMoveException("Game is over");
         }
 
-        // enforce turn order
         ChessGame.TeamColor side = getTeam(auth.username(), game);
         if (side != game.game().getTeamTurn()) {
             throw new InvalidMoveException("Not your turn");
         }
 
-        // apply move and persist
         game.game().makeMove(cmd.getMove());
         gameDAO.updateGame(game);
 
-        // broadcast updated board to everyone
         connections.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
 
-        // broadcast notification to everyone *except* the mover
         connections.broadcast(
                 cmd.getGameID(),
                 new NotificationMessage(auth.username() + " made a move."),
@@ -132,7 +121,6 @@ public class WebsocketHandler {
         if (auth == null) throw new DataAccessException("Invalid auth");
         if (game == null) throw new DataAccessException("Game not found");
 
-        // 1) if the game’s already ended, reject immediately
         if (game.game().isGameOver()) {
             throw new IllegalStateException("Game is over");
         }
@@ -141,12 +129,10 @@ public class WebsocketHandler {
         String white = game.whiteUsername();
         String black = game.blackUsername();
 
-        // 2) still only players may resign
         if (!user.equals(white) && !user.equals(black)) {
             throw new IllegalStateException("Only players may resign");
         }
 
-        // 3) now end the game and broadcast
         game.game().setGameOver(true);
         gameDAO.updateGame(game);
 
@@ -163,20 +149,15 @@ public class WebsocketHandler {
         String user  = auth.username();
         String white = game.whiteUsername();
         String black = game.blackUsername();
-
-        // 1) If they’re a player, update the DB; if they’re not, just swallow any exception.
         if (user.equals(white) || user.equals(black)) {
             try {
                 new GameService().leaveGame(cmd.getAuthToken(), cmd.getGameID());
-            } catch (Exception e) {
-                // should never happen for a real player, but if it does, treat as silent
+            } catch (Exception ignored) {
             }
         }
 
-        // 2) Remove their WS connection so they get no further messages
         connections.removeConnection(session);
 
-        // 3) Notify everyone else that they left
         NotificationMessage note = new NotificationMessage(user + " left the game.");
         try {
             connections.broadcast(cmd.getGameID(), note, session);
