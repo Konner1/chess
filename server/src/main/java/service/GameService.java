@@ -84,4 +84,42 @@ public class GameService {
         }
     }
 
+    // in service/GameService.java
+    public void leaveGame(String authToken, int gameID) throws Exception {
+        // 1) Authorization
+        if (authToken == null || authDAO.getAuth(authToken) == null) {
+            throw new Exception("unauthorized");
+        }
+        // 2) Fetch current game
+        GameData game = gameDAO.getGame(gameID);
+        if (game == null) {
+            throw new Exception("bad request");
+        }
+        String user = authDAO.getAuth(authToken).username();
+
+        String white = game.whiteUsername();
+        String black = game.blackUsername();
+        String newWhite = white, newBlack = black;
+
+        // 3) Clear the slot for whoever left
+        if (user.equals(white)) {
+            newWhite = null;
+        } else if (user.equals(black)) {
+            newBlack = null;
+        } else {
+            throw new Exception("not in game");
+        }
+
+        // 4) Persist the updated GameData
+        GameData updated = new GameData(
+                game.gameID(),
+                newWhite,
+                newBlack,
+                game.gameName(),
+                game.game()
+        );
+        gameDAO.updateGame(updated);
+    }
+
+
 }

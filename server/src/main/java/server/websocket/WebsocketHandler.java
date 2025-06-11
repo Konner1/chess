@@ -14,6 +14,7 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import server.Server;
+import service.GameService;
 import websocket.commands.*;
 import websocket.messages.*;
 
@@ -131,32 +132,58 @@ public class WebsocketHandler {
         if (auth == null) throw new DataAccessException("Invalid auth");
         if (game == null) throw new DataAccessException("Game not found");
 
-        String user = auth.username();
+        // 1) if the game’s already ended, reject immediately
+        if (game.game().isGameOver()) {
+            throw new IllegalStateException("Game is over");
+        }
+
+        String user  = auth.username();
         String white = game.whiteUsername();
         String black = game.blackUsername();
-        // ← NEW: only the white or black player may resign
+
+        // 2) still only players may resign
         if (!user.equals(white) && !user.equals(black)) {
             throw new IllegalStateException("Only players may resign");
         }
 
-        // now safe to end the game
+        // 3) now end the game and broadcast
         game.game().setGameOver(true);
         gameDAO.updateGame(game);
 
-        connections.broadcast(
-                cmd.getGameID(),
-                new NotificationMessage(user + " resigned.")
-        );
+        connections.broadcast(cmd.getGameID(),
+                new NotificationMessage(user + " resigned."));
     }
 
 
-    private void handleLeave(Session session, LeaveCommand cmd) throws IOException {
-        String user = connections.getUsername(session);
-        Integer gid = connections.getGameID(session);
+
+    private void handleLeave(Session session, LeaveCommand cmd) throws DataAccessException {
+        AuthData auth = authDAO.getAuth(cmd.getAuthToken());
+        GameData game = gameDAO.getGame(cmd.getGameID());
+
+        String user  = auth.username();
+        String white = game.whiteUsername();
+        String black = game.blackUsername();
+
+        // 1) If they’re a player, update the DB; if they’re not, just swallow any exception.
+        if (user.equals(white) || user.equals(black)) {
+            try {
+                new GameService().leaveGame(cmd.getAuthToken(), cmd.getGameID());
+            } catch (Exception e) {
+                // should never happen for a real player, but if it does, treat as silent
+            }
+        }
+
+        // 2) Remove their WS connection so they get no further messages
         connections.removeConnection(session);
-        connections.broadcast(gid,
-                new NotificationMessage(user + " left the game."));
+
+        // 3) Notify everyone else that they left
+        NotificationMessage note = new NotificationMessage(user + " left the game.");
+        try {
+            connections.broadcast(cmd.getGameID(), note, session);
+        } catch (IOException ignore) {}
     }
+
+
 
     private ChessGame.TeamColor getTeam(String user, GameData g) {
         if (user.equals(g.whiteUsername())) return ChessGame.TeamColor.WHITE;
