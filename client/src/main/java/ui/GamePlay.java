@@ -40,6 +40,8 @@ public class GamePlay implements DisplayHandler {
             String cmd = input[0].toLowerCase();
 
             try {
+                String cmds = input[0].toLowerCase();
+                System.out.println("DEBUG: Got command → '" + cmds + "'");
                 switch (cmd) {
                     case "h", "help"    -> printHelp();
                     case "hl", "highlight" -> doHighlight();

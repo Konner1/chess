@@ -28,7 +28,6 @@ public class WebSocketFacade extends Endpoint {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
 
-            // Set message handler
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
@@ -61,7 +60,6 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    // Endpoint requires this method, but you don't have to do anything with it
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         // no-op
