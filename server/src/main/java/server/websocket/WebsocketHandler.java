@@ -95,20 +95,33 @@ public class WebsocketHandler {
         if (auth == null) throw new DataAccessException("Invalid auth");
         if (game == null) throw new DataAccessException("Game not found");
 
+        // ← NEW: if the game is already over, error out immediately
+        if (game.game().isGameOver()) {
+            throw new InvalidMoveException("Game is over");
+        }
+
+        // enforce turn order
         ChessGame.TeamColor side = getTeam(auth.username(), game);
         if (side != game.game().getTeamTurn()) {
             throw new InvalidMoveException("Not your turn");
         }
 
+        // apply move and persist
         game.game().makeMove(cmd.getMove());
         gameDAO.updateGame(game);
 
-        // notify and reload
-        connections.broadcast(cmd.getGameID(),
-                new NotificationMessage(auth.username() + " made a move."));
-        connections.broadcast(cmd.getGameID(),
-                new LoadMessage(game.game()));
+        // broadcast updated board to everyone
+        connections.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
+
+        // broadcast notification to everyone *except* the mover
+        connections.broadcast(
+                cmd.getGameID(),
+                new NotificationMessage(auth.username() + " made a move."),
+                session
+        );
     }
+
+
 
     private void handleResign(Session session, ResignCommand cmd)
             throws DataAccessException, IOException
@@ -118,12 +131,24 @@ public class WebsocketHandler {
         if (auth == null) throw new DataAccessException("Invalid auth");
         if (game == null) throw new DataAccessException("Game not found");
 
+        String user = auth.username();
+        String white = game.whiteUsername();
+        String black = game.blackUsername();
+        // ← NEW: only the white or black player may resign
+        if (!user.equals(white) && !user.equals(black)) {
+            throw new IllegalStateException("Only players may resign");
+        }
+
+        // now safe to end the game
         game.game().setGameOver(true);
         gameDAO.updateGame(game);
 
-        connections.broadcast(cmd.getGameID(),
-                new NotificationMessage(auth.username() + " resigned."));
+        connections.broadcast(
+                cmd.getGameID(),
+                new NotificationMessage(user + " resigned.")
+        );
     }
+
 
     private void handleLeave(Session session, LeaveCommand cmd) throws IOException {
         String user = connections.getUsername(session);
