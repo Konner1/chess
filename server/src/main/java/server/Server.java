@@ -2,14 +2,12 @@ package server;
 
 import spark.*;
 import dataaccess.*;
-import service.*;
-import server.*;
 import server.websocket.WebsocketHandler;
 import server.websocket.ConnectionManager;
 
 public class Server {
 
-    public static final ConnectionManager connectionManager = new ConnectionManager();
+    public static final ConnectionManager CONNECTION_MANAGER = new ConnectionManager();
 
 
     public int run(int desiredPort) {

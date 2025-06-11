@@ -9,33 +9,29 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Thread-safe registry of all open Connections, keyed by gameID.
- */
+
 public class ConnectionManager {
     private final ConcurrentHashMap<Integer, CopyOnWriteArrayList<Connection>> gameConnections = new ConcurrentHashMap<>();
     private final Gson gson = new Gson();
 
-    /** Called when a client CONNECTs. */
     public void addConnection(int gameID, String username, Session session) {
         var list = gameConnections.computeIfAbsent(gameID, id -> new CopyOnWriteArrayList<>());
         list.add(new Connection(username, session, gameID));
     }
 
-    /** Remove any connection matching this Session. */
     public void removeConnection(Session session) {
         gameConnections.values().forEach(list -> list.removeIf(c -> c.getSession().equals(session)));
     }
 
-    /** Broadcast to everyone in a game. */
     public void broadcast(int gameID, ServerMessage msg) throws IOException {
         broadcast(gameID, msg, null);
     }
 
-    /** Broadcast (except optionally one Session). */
     public void broadcast(int gameID, ServerMessage msg, Session exclude) throws IOException {
         var list = gameConnections.get(gameID);
-        if (list == null) return;
+        if (list == null){
+            return;
+        }
 
         String json = gson.toJson(msg);
         for (Connection c : list) {
@@ -48,7 +44,6 @@ public class ConnectionManager {
         }
     }
 
-    /** Helper to look up who this Session belonged to. */
     private Connection findBySession(Session session) {
         return gameConnections.values().stream()
                 .flatMap(l -> l.stream())
