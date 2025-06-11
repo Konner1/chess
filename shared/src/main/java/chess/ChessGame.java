@@ -207,4 +207,16 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
+
+    private boolean gameOver = false;
+
+    /** Has the game ended? */
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    /** Mark the game over (true) or active (false). */
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
 }
