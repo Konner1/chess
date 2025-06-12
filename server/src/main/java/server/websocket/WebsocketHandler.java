@@ -85,8 +85,12 @@ public class WebsocketHandler {
     {
         AuthData auth = authDAO.getAuth(cmd.getAuthToken());
         GameData game = gameDAO.getGame(cmd.getGameID());
-        if (auth == null) throw new DataAccessException("Invalid auth");
-        if (game == null) throw new DataAccessException("Game not found");
+        if (auth == null){
+            throw new DataAccessException("Invalid auth");
+        }
+        if (game == null){
+            throw new DataAccessException("Game not found");
+        }
 
         if (game.game().isGameOver()) {
             throw new InvalidMoveException("Game is over");
