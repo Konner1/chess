@@ -97,27 +97,39 @@ public class GamePlay implements DisplayHandler {
     }
 
     private void doMove() {
+        out.print("Enter move (e.g. 'e2 e4 [promotion_piece]'): ");
+        String line = scanner.nextLine().trim().toLowerCase();
+        String[] parts = line.split("\\s+");
+        if (parts.length < 2 || parts.length > 3) {
+            out.println("Invalid format. Format: 'move e2 e4 [promotion_piece]'");
+            return;
+        }
+
         try {
-            System.out.print("From (e.g. 'e2'): ");
-            String fromInput = scanner.next().toLowerCase();
-            System.out.print("To (e.g. 'e4'): ");
-            String toInput = scanner.next().toLowerCase();
-            System.out.print("Promotion piece (optional): ");
-            String promoInput = scanner.nextLine().toLowerCase().trim();
+            String fromInput = parts[0];
+            String toInput   = parts[1];
+            String promo     = parts.length == 3 ? parts[2] : "";
 
-            ChessPosition from = new ChessPosition(fromInput.charAt(1) - '0', fromInput.charAt(0) - ('a' - 1));
-            ChessPosition to = new ChessPosition(toInput.charAt(1) - '0', toInput.charAt(0) - ('a' - 1));
+            ChessPosition from = new ChessPosition(
+                    fromInput.charAt(1) - '0',
+                    fromInput.charAt(0) - ('a' - 1)
+            );
+            ChessPosition to = new ChessPosition(
+                    toInput.charAt(1) - '0',
+                    toInput.charAt(0) - ('a' - 1)
+            );
 
-            ChessPiece.PieceType promotion = switch (promoInput) {
-                case "queen" -> ChessPiece.PieceType.QUEEN;
-                case "rook" -> ChessPiece.PieceType.ROOK;
-                case "bishop" -> ChessPiece.PieceType.BISHOP;
-                case "knight" -> ChessPiece.PieceType.KNIGHT;
-                default -> null;
-            };
+            ChessPiece.PieceType promotion;
+            switch (promo) {
+                case "queen"  -> promotion = ChessPiece.PieceType.QUEEN;
+                case "rook"   -> promotion = ChessPiece.PieceType.ROOK;
+                case "bishop" -> promotion = ChessPiece.PieceType.BISHOP;
+                case "knight" -> promotion = ChessPiece.PieceType.KNIGHT;
+                default       -> promotion = null;
+            }
 
-            ws.sendCommand(new MakeMoveCommand(authToken, gameID, new ChessMove(from, to, promotion)));
-
+            ws.sendCommand(new MakeMoveCommand(authToken, gameID,
+                    new ChessMove(from, to, promotion)));
         } catch (Exception e) {
             out.println("Invalid input. Format: 'move e2 e4 [promotion_piece]'");
         }

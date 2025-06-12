@@ -27,17 +27,17 @@ public class WebsocketHandler {
     private final AuthDAO authDAO = new MySQLAuthDAO();
     private final GameDAO gameDAO = new MySQLGameDAO();
 
-    @OnWebSocketConnect
-    public void onConnect(Session session) { /* wait for CONNECT msg */ }
-
-    @OnWebSocketClose
-    public void onClose(Session session, int status, String reason) {
-        CONNECTIONS.removeConnection(session);
-    }
-    @OnWebSocketError
-    public void onError(Session session, Throwable cause) {
-        cause.printStackTrace();
-    }
+//    @OnWebSocketConnect
+//    public void onConnect(Session session) { /* wait for CONNECT msg */ }
+//
+//    @OnWebSocketClose
+//    public void onClose(Session session, int status, String reason) {
+//        CONNECTIONS.removeConnection(session);
+//    }
+//    @OnWebSocketError
+//    public void onError(Session session, Throwable cause) {
+//        cause.printStackTrace();
+//    }
 
 
     @OnWebSocketMessage
@@ -93,14 +93,13 @@ public class WebsocketHandler {
     }
 
     private void handleMove(Session session, MakeMoveCommand cmd)
-            throws DataAccessException, InvalidMoveException, IOException
-    {
+            throws DataAccessException, InvalidMoveException, IOException {
         AuthData auth = authDAO.getAuth(cmd.getAuthToken());
         GameData game = gameDAO.getGame(cmd.getGameID());
-        if (auth == null){
+        if (auth == null) {
             throw new DataAccessException("Invalid auth");
         }
-        if (game == null){
+        if (game == null) {
             throw new DataAccessException("Game not found");
         }
 
@@ -116,14 +115,38 @@ public class WebsocketHandler {
         game.game().makeMove(cmd.getMove());
         gameDAO.updateGame(game);
 
-        CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
+        ChessGame.TeamColor nextToMove = game.game().getTeamTurn();
+        if (game.game().isInCheckmate(nextToMove)) {
+            game.game().setGameOver(true);
+            gameDAO.updateGame(game);
 
+            CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
+            String winner = (nextToMove == ChessGame.TeamColor.WHITE)
+                    ? game.blackUsername()
+                    : game.whiteUsername();
+            CONNECTIONS.broadcast(cmd.getGameID(),
+                    new NotificationMessage(winner + " wins by checkmate."));
+            return;
+        }
+
+        CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
         CONNECTIONS.broadcast(
                 cmd.getGameID(),
                 new NotificationMessage(auth.username() + " made a move."),
                 session
         );
+
+        if (game.game().isInCheck(nextToMove)) {
+            String inCheckUser = (nextToMove == ChessGame.TeamColor.WHITE)
+                    ? game.whiteUsername()
+                    : game.blackUsername();
+            CONNECTIONS.broadcast(
+                    cmd.getGameID(),
+                    new NotificationMessage(inCheckUser + " is in check.")
+            );
+        }
     }
+
 
 
 
@@ -139,25 +162,20 @@ public class WebsocketHandler {
             throw new DataAccessException("Game not found");
         }
 
-        // 1) Guard against double‐resign
         if (game.game().isGameOver()) {
             throw new IllegalStateException("Game is already over");
         }
 
-        // 2) Only the two players can resign
         String user = auth.username();
         if (!user.equals(game.whiteUsername()) && !user.equals(game.blackUsername())) {
             throw new IllegalStateException("Only players may resign");
         }
 
-        // 3) Mark game over & persist
         game.game().setGameOver(true);
         gameDAO.updateGame(game);
 
-        // 4) Broadcast final board so everyone sees gameOver==true
         CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
 
-        // 5) Broadcast the resignation notice
         CONNECTIONS.broadcast(cmd.getGameID(),
                 new NotificationMessage(user + " resigned."));
     }
