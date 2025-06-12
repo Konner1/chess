@@ -1,4 +1,3 @@
-// server/websocket/ConnectionManager.java
 package server.websocket;
 
 import org.eclipse.jetty.websocket.api.Session;
