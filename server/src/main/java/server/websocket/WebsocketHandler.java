@@ -82,45 +82,85 @@ public class WebsocketHandler {
     private void handleMove(Session session, MakeMoveCommand cmd)
             throws DataAccessException, InvalidMoveException, IOException
     {
+        // --- standard auth / lookup / guards ---
         AuthData auth = authDAO.getAuth(cmd.getAuthToken());
-        GameData game = gameDAO.getGame(cmd.getGameID());
-        if (auth == null) {
-            throw new DataAccessException("Invalid auth");
-        }
-        if (game == null) {
-            throw new DataAccessException("Game not found");
-        }
+        GameData gameData = gameDAO.getGame(cmd.getGameID());
+        if (auth == null)      throw new DataAccessException("Invalid auth");
+        if (gameData == null)  throw new DataAccessException("Game not found");
 
-        if (game.game().isGameOver()) {
+        ChessGame game = gameData.game();
+        if (game.isGameOver()) {
             throw new InvalidMoveException("Game is over");
         }
 
-        ChessGame.TeamColor side = getTeam(auth.username(), game);
-        if (side != game.game().getTeamTurn()) {
+        // whose turn is it?
+        ChessGame.TeamColor you = getTeam(auth.username(), gameData);
+        if (you != game.getTeamTurn()) {
             throw new InvalidMoveException("Not your turn");
         }
 
+        // record start/end and piece name for the notification
         ChessPosition start = cmd.getMove().getStartPosition();
         ChessPosition end   = cmd.getMove().getEndPosition();
-        ChessPiece piece = game.game().getBoard().getPiece(start);
-        String       pieceName = piece.getPieceType().name().toLowerCase();
+        ChessPiece moved    = game.getBoard().getPiece(start);
+        String pieceName    = moved.getPieceType().name().toLowerCase();
+        String from         = "" + (char)('a' + start.getColumn()-1) + start.getRow();
+        String to           = "" + (char)('a' +   end.getColumn()-1) +   end.getRow();
+        String user         = auth.username();
 
-        game.game().makeMove(cmd.getMove());
-        gameDAO.updateGame(game);
+        game.makeMove(cmd.getMove());
 
-        CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
+        ChessGame.TeamColor defenderColor = game.getTeamTurn();
 
-        String from = String.valueOf((char)('a' + start.getColumn() - 1)) + start.getRow();
-        String to   = String.valueOf((char)('a' + end.getColumn()   - 1)) + end.getRow();
-        String user = auth.username();
+        boolean isCheckmate = game.isInCheckmate(defenderColor);
+
+        boolean isCheck     = !isCheckmate && game.isInCheck(defenderColor);
+
+        gameDAO.updateGame(new GameData(
+                gameData.gameID(),
+                gameData.whiteUsername(),
+                gameData.blackUsername(),
+                gameData.gameName(),
+                game
+        ));
+
+        CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game));
+
         CONNECTIONS.broadcast(
                 cmd.getGameID(),
-                new NotificationMessage(
-                        user + " moved " + pieceName + " from " + from + " to " + to
-                ),
+                new NotificationMessage(user + " moved " + pieceName + " from " + from + " to " + to),
                 session
         );
+
+        if (isCheckmate) {
+
+            game.setGameOver(true);
+            gameDAO.updateGame(new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    game
+            ));
+
+            CONNECTIONS.broadcast(
+                    cmd.getGameID(),
+                    new NotificationMessage(user + " wins by checkmate.")
+            );
+
+        } else if (isCheck) {
+
+            String defender = defenderColor == ChessGame.TeamColor.WHITE
+                    ? gameData.whiteUsername()
+                    : gameData.blackUsername();
+
+            CONNECTIONS.broadcast(
+                    cmd.getGameID(),
+                    new NotificationMessage(defender + " is in check.")
+            );
+        }
     }
+
 
 
 
