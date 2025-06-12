@@ -48,11 +48,10 @@ public class GamePlay implements DisplayHandler {
                     case "m", "move"    -> doMove();
                     case "r", "redraw"  -> doRedraw();
                     case "res", "resign" -> {
-                        System.out.print("Are you sure you want to resign? (y/N): ");
+                        System.out.print("Are you sure you want to resign? (y/n): ");
                         String confirm = scanner.nextLine().trim().toLowerCase();
                         if (confirm.equals("y") || confirm.equals("yes")) {
                             ws.sendCommand(new ResignCommand(authToken, gameID));
-                            return;
                         } else {
                             System.out.println("Resign cancelled.");
                         }

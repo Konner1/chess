@@ -131,32 +131,38 @@ public class WebsocketHandler {
             throws DataAccessException, IOException
     {
         AuthData auth = authDAO.getAuth(cmd.getAuthToken());
-        GameData game = gameDAO.getGame(cmd.getGameID());
-        if (auth == null){
+        if (auth == null) {
             throw new DataAccessException("Invalid auth");
         }
-        if (game == null){
+        GameData game = gameDAO.getGame(cmd.getGameID());
+        if (game == null) {
             throw new DataAccessException("Game not found");
         }
 
+        // 1) Guard against double‐resign
         if (game.game().isGameOver()) {
-            throw new IllegalStateException("Game is over");
+            throw new IllegalStateException("Game is already over");
         }
 
-        String user  = auth.username();
-        String white = game.whiteUsername();
-        String black = game.blackUsername();
-
-        if (!user.equals(white) && !user.equals(black)) {
+        // 2) Only the two players can resign
+        String user = auth.username();
+        if (!user.equals(game.whiteUsername()) && !user.equals(game.blackUsername())) {
             throw new IllegalStateException("Only players may resign");
         }
 
+        // 3) Mark game over & persist
         game.game().setGameOver(true);
         gameDAO.updateGame(game);
 
+        // 4) Broadcast final board so everyone sees gameOver==true
+        CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
+
+        // 5) Broadcast the resignation notice
         CONNECTIONS.broadcast(cmd.getGameID(),
                 new NotificationMessage(user + " resigned."));
     }
+
+
 
 
 

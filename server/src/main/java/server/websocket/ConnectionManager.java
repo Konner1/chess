@@ -61,13 +61,5 @@ public class ConnectionManager {
         return c != null ? c.getGameID() : null;
     }
 
-    public void removeGame(int gameID) throws IOException {
-        var list = gameConnections.remove(gameID);
-        if (list == null) {
-            return;
-        }
-        for (Connection c : list) {
-            c.getSession().close();
-        }
-    }
+
 }
