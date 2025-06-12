@@ -7,6 +7,7 @@ import websocket.WebSocketFacade;
 import websocket.commands.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
@@ -40,8 +41,6 @@ public class GamePlay implements DisplayHandler {
             String cmd = input[0].toLowerCase();
 
             try {
-                String cmds = input[0].toLowerCase();
-                System.out.println("DEBUG: Got command → '" + cmds + "'");
                 switch (cmd) {
                     case "h", "help"    -> printHelp();
                     case "hl", "highlight" -> doHighlight();
@@ -81,20 +80,41 @@ public class GamePlay implements DisplayHandler {
     }
 
     private void doHighlight() {
-        System.out.print("Enter a position (e.g. 'e2'): ");
-        String posInput = scanner.next().toLowerCase();
-        scanner.nextLine();
-
-        if (!posInput.matches("[a-h][1-8]")) {
-            System.out.println("Invalid format. Use positions like 'e2'.");
+        if (game == null) {
+            out.println("Board not yet loaded.");
             return;
         }
 
-        ChessPosition position = new ChessPosition(posInput.charAt(1) - '0', posInput.charAt(0) - ('a' - 1));
-        List<ChessMove> legalMoves = new ArrayList<>(game.validMoves(position));
+        out.print("Enter a position (e.g. 'e2'): ");
+        String posInput = scanner.next().trim().toLowerCase();
+        scanner.nextLine();
 
-        DrawBoard.print(System.out, game, color == ChessGame.TeamColor.WHITE, legalMoves);
+        if (!posInput.matches("[a-h][1-8]")) {
+            out.println("Invalid format. Use positions like 'e2'.");
+            return;
+        }
+
+        ChessPosition position = new ChessPosition(
+                posInput.charAt(1) - '0',
+                posInput.charAt(0) - ('a' - 1)
+        );
+
+        Collection<ChessMove> moves = game.validMoves(position);
+        if (moves == null || moves.isEmpty()) {
+            out.println("No legal moves from " + posInput);
+            return;
+        }
+
+        boolean whiteBottom = (color == ChessGame.TeamColor.WHITE) || (color == null);
+
+        DrawBoard.print(
+                out,
+                game,
+                whiteBottom,
+                new ArrayList<>(moves)
+        );
     }
+
 
     private void doMove() {
         out.print("Enter move (e.g. 'e2 e4 [promotion_piece]'): ");

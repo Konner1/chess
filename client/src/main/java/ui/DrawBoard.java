@@ -59,7 +59,11 @@ public class DrawBoard {
 
     private static void setSquareColor(PrintStream out, boolean light, boolean highlight) {
         if (highlight) {
-            out.print(SET_BG_COLOR_YELLOW + SET_TEXT_COLOR_BLACK);
+            String bg = light
+                    ? SET_BG_COLOR_DARK_YELLOW
+                    : SET_BG_COLOR_YELLOW;
+
+            out.print(bg + SET_TEXT_COLOR_BLACK);
         } else if (light) {
             out.print(SET_BG_COLOR_DARK_GREEN + SET_TEXT_COLOR_BLACK);
         } else {

@@ -27,18 +27,6 @@ public class WebsocketHandler {
     private final AuthDAO authDAO = new MySQLAuthDAO();
     private final GameDAO gameDAO = new MySQLGameDAO();
 
-//    @OnWebSocketConnect
-//    public void onConnect(Session session) { /* wait for CONNECT msg */ }
-//
-//    @OnWebSocketClose
-//    public void onClose(Session session, int status, String reason) {
-//        CONNECTIONS.removeConnection(session);
-//    }
-//    @OnWebSocketError
-//    public void onError(Session session, Throwable cause) {
-//        cause.printStackTrace();
-//    }
-
 
     @OnWebSocketMessage
     public void onMessage(Session session, String raw) {
