@@ -39,7 +39,6 @@ public class GamePlay implements DisplayHandler {
             if (input.length == 0 || input[0].isBlank()) { continue; }
 
             String cmd = input[0].toLowerCase();
-
             try {
                 switch (cmd) {
                     case "h", "help"    -> printHelp();
