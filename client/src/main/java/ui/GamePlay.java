@@ -36,35 +36,39 @@ public class GamePlay implements DisplayHandler {
         while (true) {
             out.print("\n[CHESS GAME] >>> ");
             String[] input = scanner.nextLine().trim().split(" ");
-            if (input.length == 0 || input[0].isBlank()) { continue; }
+            if (input.length == 0 || input[0].isBlank()) {
+                continue;
+            }
 
             String cmd = input[0].toLowerCase();
             try {
                 switch (cmd) {
-                    case "h", "help"    -> printHelp();
+                    case "h", "help"       -> printHelp();
                     case "hl", "highlight" -> doHighlight();
-                    case "m", "move"    -> doMove();
-                    case "r", "redraw"  -> doRedraw();
-                    case "res", "resign" -> {
-                        System.out.print("Are you sure you want to resign? (y/n): ");
-                        String confirm = scanner.nextLine().trim().toLowerCase();
-                        if (confirm.equals("y") || confirm.equals("yes")) {
-                            ws.sendCommand(new ResignCommand(authToken, gameID));
-                        } else {
-                            System.out.println("Resign cancelled.");
-                        }
-                    }
-                    case "le", "leave"  -> {
+                    case "m", "move"       -> doMove();
+                    case "r", "redraw"     -> doRedraw();
+                    case "res", "resign"   -> doResign();
+                    case "le", "leave"     -> {
                         ws.sendCommand(new LeaveCommand(authToken, gameID));
                         return;
                     }
-                    default -> out.println("Unknown command. Try 'help'.");
+                    default                -> out.println("Unknown command. Try 'help'.");
                 }
             } catch (ResponseException e) {
                 out.printf("Error: %s%n", e.getMessage());
             } catch (Exception e) {
                 out.println("Invalid input. Try again.");
             }
+        }
+    }
+
+    private void doResign() throws ResponseException {
+        out.print("Are you sure you want to resign? (y/n): ");
+        String confirm = scanner.nextLine().trim().toLowerCase();
+        if (confirm.equals("y") || confirm.equals("yes")) {
+            ws.sendCommand(new ResignCommand(authToken, gameID));
+        } else {
+            out.println("Resign cancelled.");
         }
     }
 
