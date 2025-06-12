@@ -30,7 +30,7 @@ public class GamePlay implements DisplayHandler {
     }
 
     public void run() {
-        out.println("\u2655 You are now playing a game! Type 'help' for options.");
+        out.println("\n You are now playing a game! Type 'help' for options.");
 
         while (true) {
             out.print("\n[CHESS GAME] >>> ");
@@ -48,8 +48,14 @@ public class GamePlay implements DisplayHandler {
                     case "m", "move"    -> doMove();
                     case "r", "redraw"  -> doRedraw();
                     case "res", "resign" -> {
-                        ws.sendCommand(new ResignCommand(authToken, gameID));
-                        return;
+                        System.out.print("Are you sure you want to resign? (y/N): ");
+                        String confirm = scanner.nextLine().trim().toLowerCase();
+                        if (confirm.equals("y") || confirm.equals("yes")) {
+                            ws.sendCommand(new ResignCommand(authToken, gameID));
+                            return;
+                        } else {
+                            System.out.println("Resign cancelled.");
+                        }
                     }
                     case "le", "leave"  -> {
                         ws.sendCommand(new LeaveCommand(authToken, gameID));
