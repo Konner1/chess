@@ -1,7 +1,6 @@
 package server.websocket;
 
-import chess.ChessGame;
-import chess.InvalidMoveException;
+import chess.*;
 import com.google.gson.Gson;
 import dataaccess.AuthDAO;
 import dataaccess.GameDAO;
@@ -85,10 +84,10 @@ public class WebsocketHandler {
     {
         AuthData auth = authDAO.getAuth(cmd.getAuthToken());
         GameData game = gameDAO.getGame(cmd.getGameID());
-        if (auth == null){
+        if (auth == null) {
             throw new DataAccessException("Invalid auth");
         }
-        if (game == null){
+        if (game == null) {
             throw new DataAccessException("Game not found");
         }
 
@@ -101,31 +100,28 @@ public class WebsocketHandler {
             throw new InvalidMoveException("Not your turn");
         }
 
-        // 1) apply the move
+        ChessPosition start = cmd.getMove().getStartPosition();
+        ChessPosition end   = cmd.getMove().getEndPosition();
+        ChessPiece piece = game.game().getBoard().getPiece(start);
+        String       pieceName = piece.getPieceType().name().toLowerCase();
+
         game.game().makeMove(cmd.getMove());
         gameDAO.updateGame(game);
 
-        // 2) broadcast updated board
         CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
 
-        // 3) broadcast “made a move” to everyone else
+        String from = String.valueOf((char)('a' + start.getColumn() - 1)) + start.getRow();
+        String to   = String.valueOf((char)('a' + end.getColumn()   - 1)) + end.getRow();
         String user = auth.username();
         CONNECTIONS.broadcast(
                 cmd.getGameID(),
-                new NotificationMessage(user + " made a move."),
+                new NotificationMessage(
+                        user + " moved " + pieceName + " from " + from + " to " + to
+                ),
                 session
         );
-
-        // 4) if that move delivered checkmate, announce the winner
-        //    after makeMove() teamTurn has flipped, so checkmate on the side to move
-        ChessGame.TeamColor nowToMove = game.game().getTeamTurn();
-        if (game.game().isInCheckmate(nowToMove)) {
-            CONNECTIONS.broadcast(
-                    cmd.getGameID(),
-                    new NotificationMessage(user + " wins by checkmate.")
-            );
-        }
     }
+
 
 
 
