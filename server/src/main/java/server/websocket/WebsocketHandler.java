@@ -93,15 +93,12 @@ public class WebsocketHandler {
     }
 
     private void handleMove(Session session, MakeMoveCommand cmd)
-            throws DataAccessException, InvalidMoveException, IOException {
+            throws DataAccessException, InvalidMoveException, IOException
+    {
         AuthData auth = authDAO.getAuth(cmd.getAuthToken());
         GameData game = gameDAO.getGame(cmd.getGameID());
-        if (auth == null) {
-            throw new DataAccessException("Invalid auth");
-        }
-        if (game == null) {
-            throw new DataAccessException("Game not found");
-        }
+        if (auth == null) throw new DataAccessException("Invalid auth");
+        if (game == null) throw new DataAccessException("Game not found");
 
         if (game.game().isGameOver()) {
             throw new InvalidMoveException("Game is over");
@@ -112,40 +109,32 @@ public class WebsocketHandler {
             throw new InvalidMoveException("Not your turn");
         }
 
+        // 1) apply the move
         game.game().makeMove(cmd.getMove());
         gameDAO.updateGame(game);
 
-        ChessGame.TeamColor nextToMove = game.game().getTeamTurn();
-        if (game.game().isInCheckmate(nextToMove)) {
-            game.game().setGameOver(true);
-            gameDAO.updateGame(game);
-
-            CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
-            String winner = (nextToMove == ChessGame.TeamColor.WHITE)
-                    ? game.blackUsername()
-                    : game.whiteUsername();
-            CONNECTIONS.broadcast(cmd.getGameID(),
-                    new NotificationMessage(winner + " wins by checkmate."));
-            return;
-        }
-
+        // 2) broadcast updated board
         CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
+
+        // 3) broadcast “made a move” to everyone else
+        String user = auth.username();
         CONNECTIONS.broadcast(
                 cmd.getGameID(),
-                new NotificationMessage(auth.username() + " made a move."),
+                new NotificationMessage(user + " made a move."),
                 session
         );
 
-        if (game.game().isInCheck(nextToMove)) {
-            String inCheckUser = (nextToMove == ChessGame.TeamColor.WHITE)
-                    ? game.whiteUsername()
-                    : game.blackUsername();
+        // 4) if that move delivered checkmate, announce the winner
+        //    after makeMove() teamTurn has flipped, so checkmate on the side to move
+        ChessGame.TeamColor nowToMove = game.game().getTeamTurn();
+        if (game.game().isInCheckmate(nowToMove)) {
             CONNECTIONS.broadcast(
                     cmd.getGameID(),
-                    new NotificationMessage(inCheckUser + " is in check.")
+                    new NotificationMessage(user + " wins by checkmate.")
             );
         }
     }
+
 
 
 
@@ -173,8 +162,6 @@ public class WebsocketHandler {
 
         game.game().setGameOver(true);
         gameDAO.updateGame(game);
-
-        CONNECTIONS.broadcast(cmd.getGameID(), new LoadMessage(game.game()));
 
         CONNECTIONS.broadcast(cmd.getGameID(),
                 new NotificationMessage(user + " resigned."));

@@ -145,11 +145,16 @@ public class GamePlay implements DisplayHandler {
         doRedraw();
     }
 
+    private static final String RED   = "\u001B[31m";
+    private static final String RESET = "\u001B[0m";
+
     @Override
     public void notify(String message) {
-        System.out.println("\n[NOTIFICATION] " + message);
+        System.out.println();
+        System.out.println(RED
+                + "[NOTIFICATION] " + message
+                + RESET);
     }
-
     @Override
     public void error(String errorMessage) {
         System.out.println("\n[ERROR] " + errorMessage);
